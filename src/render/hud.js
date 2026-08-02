@@ -1,5 +1,5 @@
 /* HUD — player sheet, bag, log, tension card, game-over screen. */
-import { ITEMS, WEAPONS, LOG_MAX, DECK_CRITICAL, CARD_FLIP_DELAY } from '../config.js';
+import { ITEMS, WEAPONS, LOG_MAX, DECK_CRITICAL, CARD_FLIP_DELAY, BANNER_HOLD } from '../config.js';
 import { tileAt, tile } from '../rules/board.js';
 import { ammoCount } from '../rules/bag.js';
 import { actions } from '../rules/actions.js';
@@ -8,13 +8,15 @@ import { recompute, draw } from './canvas.js';
 const ICONS = { ammo:'▮', green_herb:'❦', red_herb:'❧', spade_key:'♠', keycard:'▤', shotgun:'⌐' };
 const PHASE_LABELS = { player:'À vous', enemies:'Les ennemis agissent', tension:'Tension' };
 
-// Transient phase banner over the board (CSS keyframes drive the fade in/out).
+// Transient phase banner over the board. Shown by class toggle and hidden on a
+// JS timer so it stays readable when prefers-reduced-motion disables animations.
+let bannerTimer;
 export function banner(text, tone=''){
   const b = document.getElementById('banner');
   document.getElementById('bannerText').textContent = text;
-  b.className = '';
-  void b.offsetWidth; // restart the CSS animation
   b.className = 'show'+(tone?' '+tone:'');
+  clearTimeout(bannerTimer);
+  bannerTimer = setTimeout(()=>b.classList.remove('show'), BANNER_HOLD);
 }
 
 export function refresh(app, cardDrawn=false){

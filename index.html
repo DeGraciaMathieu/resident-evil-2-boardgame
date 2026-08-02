@@ -88,13 +88,17 @@ button.red{border-color:#6A2A2A; color:#D08585}
 button.red:hover:not(:disabled){background:var(--blood); color:var(--paper); border-color:var(--blood)}
 button:focus-visible{outline:2px solid var(--warning); outline-offset:2px}
 .hint{font-size:11px; color:#5F7278; margin-left:auto}
-#banner{position:absolute; inset:0; display:grid; place-content:center; pointer-events:none; z-index:4; opacity:0}
-#banner.show{animation:banner 1.4s cubic-bezier(.2,.7,.3,1) forwards}
+/* Visibility is driven by the .show class (JS-timed), never by an animation:
+   the banner must stay readable under prefers-reduced-motion. */
+#banner{position:absolute; inset:0; display:grid; place-content:center; pointer-events:none; z-index:4;
+  opacity:0; transition:opacity .25s ease}
+#banner.show{opacity:1}
 #banner span{font-family:var(--display); font-size:44px; font-weight:800; letter-spacing:.12em; text-transform:uppercase;
   color:var(--paper); text-shadow:0 2px 18px rgba(0,0,0,.85); background:rgba(9,14,16,.6);
-  padding:7px 28px 3px; border-top:1px solid #2A3B42; border-bottom:1px solid #2A3B42}
+  padding:7px 28px 3px; border-top:1px solid #2A3B42; border-bottom:1px solid #2A3B42;
+  transform:scale(.94); transition:transform .3s cubic-bezier(.2,.7,.3,1)}
+#banner.show span{transform:scale(1)}
 #banner.enemy span{color:#C86A6A} #banner.tension span{color:var(--warning)} #banner.player span{color:var(--paper)}
-@keyframes banner{0%{opacity:0; transform:scale(.92)} 12%{opacity:1; transform:scale(1)} 78%{opacity:1} 100%{opacity:0; transform:scale(1.02)}}
 #gameOver{position:absolute; inset:0; display:none; place-content:center; text-align:center;
   background:rgba(9,14,16,.92); z-index:5; padding:20px}
 #gameOver.on{display:grid}
