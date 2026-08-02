@@ -30,7 +30,7 @@ export function createGame(seed){
     player:{ name:PLAYER_NAME, hp:MAX_HP, maxHp:MAX_HP, c:[...START_CELL], weapon:START_WEAPON },
     bag:START_BAG.map(i=>({...i})), bagMax:BAG_MAX,
     enemies:[], nextId:1,
-    tokens, openDoors:[], unlockedDoors:[], deck, discard:[],
+    tokens, openDoors:[], unlockedDoors:[], lastRolls:[], deck, discard:[],
     phase:'player', over:null,
     log:[{t:'sys', m:'Hall principal. La sortie parking est condamnée par un lecteur de badge.'}],
   };

@@ -34,7 +34,7 @@ transient cosmetic effects pushed via `addFx`, timed with `performance.now`) and
 | Footer buttons | `bindButtons(app, {act})` | `src/input/buttons.js` |
 | Intent → rule → render | `act(app, action)` | `src/loop/controller.js` |
 | End-of-turn playback | `playback` (private) — replays `endTurnSteps` with `STEP_DELAYS`, one `refresh` per step, sets `app.focus`, stages FX via `stage` | `src/loop/controller.js` |
-| Playback FX (move tween, spawn pop, floating damage) | `addFx(app, fx)` + rendering in `draw`, durations in `FX_DURATION` | `src/render/canvas.js` |
+| Playback FX (move tween, spawn pop, floating damage, dice roll) | `addFx(app, fx)` + rendering in `draw`, durations in `FX_DURATION`; the dice fx is staged by `act` from `S.lastRolls` after an attack | `src/render/canvas.js`, `src/loop/controller.js` |
 | Phase banner over the board | `banner(text, tone)` — ids `banner`/`bannerText`, tones `enemy`/`tension`/`player`; shown by class `show`, hidden on a JS timer (`BANNER_HOLD`) | `src/render/hud.js` |
 | Card pull animation | class `pull` on id `deck` (keyframes `pull`), added by `refresh` when a card is drawn | `src/render/hud.js` |
 | Phase label (header) | `PHASE_LABELS` + id `phase` (class `busy` outside the player phase) | `src/render/hud.js` |

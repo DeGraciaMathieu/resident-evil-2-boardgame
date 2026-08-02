@@ -199,6 +199,32 @@ export function draw(app){
     ctx.globalAlpha=1;
   }
 
+  // dice rolled over the shot target: tumbling faces, then the real values
+  for (const f of app.fx){
+    if (f.kind!=='dice') continue;
+    const p=(now-f.t0)/f.dur, [a,b]=px(f.c);
+    const rolling = p < .5;
+    const side=t*.36, gap=t*.08;
+    const width = f.dice.length*side + (f.dice.length-1)*gap;
+    let x = a + t/2 - width/2 + side/2;
+    const y = b - t*.32;
+    ctx.globalAlpha = p>.85 ? (1-p)/.15 : 1;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font=`700 ${Math.max(9,Math.round(side*.62))}px "Courier Prime", monospace`;
+    for (let i=0;i<f.dice.length;i++){
+      const v = rolling ? (Math.floor(now/55)+i*2)%4 : f.dice[i];
+      ctx.save(); ctx.translate(x,y);
+      if (rolling) ctx.rotate(Math.sin(now/45 + i*2)*.5);
+      ctx.fillStyle='#F0E4C8'; ctx.fillRect(-side/2,-side/2,side,side);
+      ctx.strokeStyle='#16232A'; ctx.lineWidth=1.5; ctx.strokeRect(-side/2,-side/2,side,side);
+      ctx.fillStyle = !rolling && v===0 ? '#7E1C1C' : '#16232A';
+      ctx.fillText(v, 0, 1);
+      ctx.restore();
+      x += side+gap;
+    }
+    ctx.globalAlpha=1;
+  }
+
   ctx.restore();
   if ((app.shake>0 || app.fx.length) && !app.raf){
     app.raf = true;

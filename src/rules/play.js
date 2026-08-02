@@ -26,9 +26,11 @@ export function play(s, action){
       const targets = weapon.area
         ? s.enemies.filter(e => cellDistance(s.player.c,e.c)<=weapon.range && lineOfSight(s,s.player.c,e.c))
         : [s.enemies.find(e=>e.id===action.target)].filter(Boolean);
+      s.lastRolls = []; // what the player must see rolled, one entry per target
       for (const target of targets){
         const dice = Array.from({length:weapon.dice}, ()=>DIE[rndInt(s.rng,DIE.length)]);
         const total = dice.reduce((a,b)=>a+b,0);
+        s.lastRolls.push({ dice, total, c:[...target.c] });
         target.hp -= total;
         say(s, `${weapon.name} → ${target.name} · dés [${dice.join(' ')}] = ${total}`, total?'good':'bad');
         if (target.hp<=0){ s.enemies=s.enemies.filter(e=>e.id!==target.id); say(s,`${target.name} s'effondre.`,'good'); }

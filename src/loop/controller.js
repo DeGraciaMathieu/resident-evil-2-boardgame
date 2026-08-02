@@ -12,6 +12,8 @@ export function act(app, a){
   if (!a || app.S.phase!=='player') return;
   const n = app.S.deck.length;
   play(app.S, a);
+  if (a.type==='attack')
+    for (const r of app.S.lastRolls) addFx(app, { kind:'dice', dice:r.dice, c:r.c });
   refresh(app, n !== app.S.deck.length);
   if (turnOver(app.S)) playback(app, endTurnSteps(app.S));
 }

@@ -38,6 +38,7 @@ Import arrows always point down this table. `input/` never touches `render/` nor
 
 - `S` (game state, `createGame`): `seed`, `rng`, `turn`, `ap`/`maxAp`, `player`,
   `bag`/`bagMax`, `enemies`, `nextId`, `tokens`, `openDoors`, `unlockedDoors`,
+  `lastRolls` (last attack's dice, one entry per target),
   `deck`/`discard`/
   `lastCard`, `lastTile`, `phase` (`player`|`enemies`|`tension`), `over`
   (`null`|`victory`|`defeat`), `log`.

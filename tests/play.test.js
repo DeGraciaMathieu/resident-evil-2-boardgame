@@ -51,6 +51,11 @@ test('attacking spends one round and deals the seeded dice', () => {
   s.enemies = [{ id:1, type:'zombie', name:'Zombie', hp:4, damage:2, speed:2, c:[5,4] }];
   play(s, { type:'attack', target:1, cost:1 });
   assert.equal(s.bag[0].n, 3);
+  // the roll the player sees on the board: two pistol dice over the target
+  assert.equal(s.lastRolls.length, 1);
+  assert.equal(s.lastRolls[0].dice.length, 2);
+  assert.deepEqual(s.lastRolls[0].c, [5,4]);
+  assert.equal(s.enemies[0]?.hp ?? 0, 4 - s.lastRolls[0].total);
   const replay = base();
   replay.enemies = [{ id:1, type:'zombie', name:'Zombie', hp:4, damage:2, speed:2, c:[5,4] }];
   play(replay, { type:'attack', target:1, cost:1 });
