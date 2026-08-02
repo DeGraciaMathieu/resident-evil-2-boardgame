@@ -42,7 +42,7 @@ Import arrows always point down this table. `input/` never touches `render/` nor
   (`null`|`victory`|`defeat`), `log`.
 - `app` (application state, `main.js`): `cv`, `ctx`, `S`, `G` (geometry), `hover`,
   `reachable`, `targets`, `shake`, `focus` (enemy acting during the end-of-turn
-  playback).
+  playback), `fx` (transient cosmetic effects), `raf` (single-rAF-chain guard).
 
 ## Where new code goes, by type of change
 

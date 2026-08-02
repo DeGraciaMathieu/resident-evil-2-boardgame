@@ -92,6 +92,7 @@ Deviations from the `rules-extraction` skill's layer table, approved at GATE 2:
 | `newGame()` — seed draw when the URL provides none | entry-point seed | stays in the bootstrap: only the entry point decides the seed |
 | `createGame` — token contents, spade-key placement, deck shuffles | rule-bearing | already seeded via `makeRng(seed)` → `s.rng`, kept as is |
 | `play` case `attack` — dice rolls | rule-bearing | already seeded via `s.rng`, kept as is |
+| `draw()` / `addFx()` — end-of-turn playback FX (`performance.now()`, canvas tweens) | cosmetic | added later in render, presentation timing only — never read by the rules |
 
 Seed: `user-provided` (URL parameter `?seed=N`), otherwise drawn randomly at bootstrap.
 

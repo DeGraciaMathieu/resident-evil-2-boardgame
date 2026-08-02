@@ -21,7 +21,8 @@ station's ground floor and must reach the parking exit before the tension deck r
 - **No `Math.random()`, `Date.now()`, `performance.now()` in `src/rules/`.**
   Rule randomness goes exclusively through `s.rng` (seeded generator from
   `src/rules/rng.js`). Only exceptions, documented in `docs/decisions.md`: the cosmetic
-  shake in `src/render/canvas.js` and the seed draw in `src/main.js`.
+  shake and FX timing (`performance.now`) in `src/render/canvas.js` and the seed draw
+  in `src/main.js`.
 - **No magic value outside `src/config.js`**: every rule value (cost, range, damage,
   distance, threshold, delay) is a named export of `config.js`.
 - **Imports point downward, never the other way**:

@@ -10,13 +10,15 @@ Rendering reads the state, never decides it. All application state flows through
 `app` object created by `src/main.js`:
 
 ```js
-app = { cv, ctx, S, G, hover, reachable, targets, shake, focus }
+app = { cv, ctx, S, G, hover, reachable, targets, shake, focus, fx, raf }
 ```
 
 `S` is the game state; `G` the geometry (`{t, ox, oy}`: cell size and centering);
 `reachable` (Map of cell key → `move` action) and `targets` (Set of enemy ids) are
 recomputed by `recompute(app)` from `actions(S)`; `focus` (enemy id or null) is set
-by the controller's end-of-turn playback and ringed by `draw`.
+by the controller's end-of-turn playback and ringed by `draw`; `fx` (list of
+transient cosmetic effects pushed via `addFx`, timed with `performance.now`) and
+`raf` (guard so only one `requestAnimationFrame` chain runs) belong to the render.
 
 ## Who does what
 
@@ -31,7 +33,10 @@ by the controller's end-of-turn playback and ringed by `draw`.
 | Board hover and click | `bindMouse(app, {act, refresh, draw})` | `src/input/mouse.js` |
 | Footer buttons | `bindButtons(app, {act})` | `src/input/buttons.js` |
 | Intent → rule → render | `act(app, action)` | `src/loop/controller.js` |
-| End-of-turn playback | `playback` (private) — replays `endTurnSteps` with `STEP_DELAYS`, one `refresh` per step, sets `app.focus` | `src/loop/controller.js` |
+| End-of-turn playback | `playback` (private) — replays `endTurnSteps` with `STEP_DELAYS`, one `refresh` per step, sets `app.focus`, stages FX via `stage` | `src/loop/controller.js` |
+| Playback FX (move tween, spawn pop, floating damage) | `addFx(app, fx)` + rendering in `draw`, durations in `FX_DURATION` | `src/render/canvas.js` |
+| Phase banner over the board | `banner(text, tone)` — ids `banner`/`bannerText`, tones `enemy`/`tension`/`player`, CSS keyframes `banner` | `src/render/hud.js` |
+| Card pull animation | class `pull` on id `deck` (keyframes `pull`), added by `refresh` when a card is drawn | `src/render/hud.js` |
 | Phase label (header) | `PHASE_LABELS` + id `phase` (class `busy` outside the player phase) | `src/render/hud.js` |
 | HUD DOM ids | `turnNo`, `phase`, `seedNo`, `hp`, `ap`, `weapon`, `dice`, `ammo`, `location`, `bag`, `log`, `remaining`, `card`, `cardTitle`, `cardText`, `cardNum`, `gameOver`, `gameOverTitle`, `gameOverText`, buttons `btnSearch`/`btnHeal`/`btnCombine`/`btnWeapon`/`btnEndTurn` | `index.html` |
 
