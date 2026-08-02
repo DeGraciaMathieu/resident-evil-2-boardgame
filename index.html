@@ -165,9 +165,7 @@ import {
   TUILES, PORTES, APPARITIONS, JETONS, ITEMS, ARMES, DE,
   TENSION,
   NOM_JOUEUR, PV_MAX, PA_MAX, CASE_DEPART, ARME_DEPART, SAC_MAX, SAC_DEPART,
-  POOL_JETONS_A, MUNITIONS_PAR_JETON, DECK_COUPE,
-  SOIN_HERBE_VERTE, SOIN_SOUFFLE, MUNITIONS_TROUVAILLE, BONUS_GROUILLE,
-  DIST_APPARITION,
+  POOL_JETONS_A, MUNITIONS_PAR_JETON, DECK_COUPE, SOIN_HERBE_VERTE,
   JOURNAL_MAX, DECK_CRITIQUE, DELAI_FLIP_CARTE, SEED_MAX,
   SECOUSSE_INITIALE, SECOUSSE_AMORTISSEMENT, SECOUSSE_SEUIL,
 } from './src/config.js';
@@ -178,7 +176,8 @@ import { vue } from './src/rules/vue.js';
 import { ajouter, retirer, nbMunitions } from './src/rules/sac.js';
 import { actions } from './src/rules/actions.js';
 import { dit } from './src/rules/journal.js';
-import { activer, spawn } from './src/rules/ennemis.js';
+import { activer } from './src/rules/ennemis.js';
+import { tirerTension } from './src/rules/tension.js';
 
 /* ------------------------------------------------------------- PARTIE */
 function creerPartie(seed){
@@ -262,22 +261,6 @@ function jouer(s, action){
 
   if (s.pa<=0 && !s.fin) finDeTour(s);
   return s;
-}
-
-/* -------------------------------------------- ennemis & tension */
-function tirerTension(s){
-  if (!s.deck.length){ s.fin='defaite'; dit(s,'Le bâtiment est submergé. Plus aucune issue.','mal'); return; }
-  const c = s.deck.shift(); s.defausse.push(c); s.derniereCarte=c;
-  dit(s, `TENSION — ${c.titre} : ${c.texte}`, 'tension');
-  switch(c.id){
-    case 'approche': spawn(s,'zombie',DIST_APPARITION.approche); break;
-    case 'grogne':   spawn(s,'zombie',DIST_APPARITION.grogne); break;
-    case 'meute':    spawn(s,'chien',DIST_APPARITION.meute);  break;
-    case 'licker':   spawn(s,'licker',DIST_APPARITION.licker); break;
-    case 'souffle':  s.joueur.pv=Math.min(s.joueur.pvMax,s.joueur.pv+SOIN_SOUFFLE); break;
-    case 'trouvaille': ajouter(s,'munitions',MUNITIONS_TROUVAILLE); break;
-    case 'grouille': activer(s,BONUS_GROUILLE); break;
-  }
 }
 
 function finDeTour(s){
