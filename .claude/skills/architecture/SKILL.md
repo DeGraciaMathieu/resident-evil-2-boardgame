@@ -19,16 +19,16 @@ auto_invoke: true
 | `src/rules/bag.js` | `hasItem`, `addItem`, `removeItem`, `ammoCount` | config |
 | `src/rules/actions.js` | `actions(s)`: the set of legal actions | config, board, movement, sight, bag |
 | `src/rules/play.js` | `play(s, action)`: applies a legal action | config, rng, board, movement, sight, bag, log, turn |
-| `src/rules/enemies.js` | `activate`, `spawnPoint`, `spawn` | config, board, movement, log |
-| `src/rules/tension.js` | `drawTension(s)`: draws and resolves a card | config, bag, enemies, log |
-| `src/rules/turn.js` | `endTurn(s)`: enemies → tension → player | enemies, tension |
+| `src/rules/enemies.js` | `activateSteps` (step-by-step generator) / `activate`, `spawnPoint`, `spawn` | config, board, movement, log |
+| `src/rules/tension.js` | `drawTensionSteps` (generator) / `drawTension(s)`: draws and resolves a card | config, bag, enemies, log |
+| `src/rules/turn.js` | `endTurnSteps` (generator) / `endTurn(s)`: enemies → tension → player; `turnOver(s)` predicate | enemies, tension |
 | `src/rules/log.js` | `say(s, m, t)`: pushes a message into `s.log` | nothing |
 | `src/state/game.js` | `createGame(seed)`: builds the whole state `S` | config, rng, board |
 | `src/render/canvas.js` | `resize`, `geometry`, `recompute`, `draw` — canvas board, shake | config, board, actions |
 | `src/render/hud.js` | `refresh(app, cardDrawn)` — sheet, gauges, bag, log, tension card, game over | config, board, bag, actions, canvas |
 | `src/input/mouse.js` | `bindMouse(app, {act, refresh, draw})` — board hover and click | config, rules (read) |
 | `src/input/buttons.js` | `bindButtons(app, {act})` — footer buttons | rules (read) |
-| `src/loop/controller.js` | `act(app, a)`: intent → `play` → `refresh` | rules/play, render/hud |
+| `src/loop/controller.js` | `act(app, a)`: intent → `play` → `refresh`; when AP run out, replays `endTurnSteps` with `STEP_DELAYS` (one refresh per step) | config, rules/play, rules/turn, render/hud |
 | `src/main.js` | `app` object, seed (URL or random), wiring, `newGame` | everything |
 
 Import arrows always point down this table. `input/` never touches `render/` nor
@@ -41,7 +41,8 @@ Import arrows always point down this table. `input/` never touches `render/` nor
   `lastCard`, `lastTile`, `phase` (`player`|`enemies`|`tension`), `over`
   (`null`|`victory`|`defeat`), `log`.
 - `app` (application state, `main.js`): `cv`, `ctx`, `S`, `G` (geometry), `hover`,
-  `reachable`, `targets`, `shake`.
+  `reachable`, `targets`, `shake`, `focus` (enemy acting during the end-of-turn
+  playback).
 
 ## Where new code goes, by type of change
 

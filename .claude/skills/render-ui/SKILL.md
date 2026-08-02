@@ -10,12 +10,13 @@ Rendering reads the state, never decides it. All application state flows through
 `app` object created by `src/main.js`:
 
 ```js
-app = { cv, ctx, S, G, hover, reachable, targets, shake }
+app = { cv, ctx, S, G, hover, reachable, targets, shake, focus }
 ```
 
 `S` is the game state; `G` the geometry (`{t, ox, oy}`: cell size and centering);
 `reachable` (Map of cell key → `move` action) and `targets` (Set of enemy ids) are
-recomputed by `recompute(app)` from `actions(S)`.
+recomputed by `recompute(app)` from `actions(S)`; `focus` (enemy id or null) is set
+by the controller's end-of-turn playback and ringed by `draw`.
 
 ## Who does what
 
@@ -30,7 +31,9 @@ recomputed by `recompute(app)` from `actions(S)`.
 | Board hover and click | `bindMouse(app, {act, refresh, draw})` | `src/input/mouse.js` |
 | Footer buttons | `bindButtons(app, {act})` | `src/input/buttons.js` |
 | Intent → rule → render | `act(app, action)` | `src/loop/controller.js` |
-| HUD DOM ids | `turnNo`, `seedNo`, `hp`, `ap`, `weapon`, `dice`, `ammo`, `location`, `bag`, `log`, `remaining`, `card`, `cardTitle`, `cardText`, `cardNum`, `gameOver`, `gameOverTitle`, `gameOverText`, buttons `btnSearch`/`btnHeal`/`btnCombine`/`btnWeapon`/`btnEndTurn` | `index.html` |
+| End-of-turn playback | `playback` (private) — replays `endTurnSteps` with `STEP_DELAYS`, one `refresh` per step, sets `app.focus` | `src/loop/controller.js` |
+| Phase label (header) | `PHASE_LABELS` + id `phase` (class `busy` outside the player phase) | `src/render/hud.js` |
+| HUD DOM ids | `turnNo`, `phase`, `seedNo`, `hp`, `ap`, `weapon`, `dice`, `ammo`, `location`, `bag`, `log`, `remaining`, `card`, `cardTitle`, `cardText`, `cardNum`, `gameOver`, `gameOverTitle`, `gameOverText`, buttons `btnSearch`/`btnHeal`/`btnCombine`/`btnWeapon`/`btnEndTurn` | `index.html` |
 
 ## The layer contract
 
