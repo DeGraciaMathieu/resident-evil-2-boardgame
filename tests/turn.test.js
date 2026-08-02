@@ -28,7 +28,7 @@ test('the end of turn replays one visible change at a time: each enemy step, the
     kinds.push(step.kind);
     if (step.kind==='move') cells.push([...s.enemies[0].c]);
   }
-  assert.deepEqual(kinds, ['phase','move','move','phase','card']);
+  assert.deepEqual(kinds, ['phase','move','move','phase','card','turn']);
   assert.deepEqual(cells, [[5,4],[4,4]]); // one cell per step, visible each time
   assert.equal(s.phase, 'player');
   assert.equal(s.turn, 2);

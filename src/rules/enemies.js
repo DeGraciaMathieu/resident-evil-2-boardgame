@@ -14,15 +14,16 @@ export function* activateSteps(s, bonus=0){
       if (cellDistance(e.c, s.player.c)===1 && canPass(s,e.c,s.player.c,true)){
         s.player.hp -= e.damage;
         say(s, `${e.name} vous frappe. −${e.damage} PV.`, 'bad');
-        yield { kind:'strike', id:e.id };
+        yield { kind:'strike', id:e.id, dmg:e.damage };
         break;
       }
       const path = firstStep(s, e.c, s.player.c, true);
       if (!path || !path.length) break;
       const next = path[0];
       if (sameCell(next, s.player.c) || s.enemies.some(o=>o!==e && sameCell(o.c,next))) break;
+      const from = e.c;
       e.c = next; steps--;
-      yield { kind:'move', id:e.id };
+      yield { kind:'move', id:e.id, from, to:next };
     }
     if (s.player.hp<=0){ s.over='defeat'; say(s,'Vous ne vous relevez pas.','bad'); return; }
   }

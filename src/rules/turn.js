@@ -16,6 +16,7 @@ export function* endTurnSteps(s){
   yield* drawTensionSteps(s);
   if (s.over) return;
   s.turn+=1; s.ap=s.maxAp; s.phase='player';
+  yield { kind:'turn' };
 }
 
 export function endTurn(s){ for (const _ of endTurnSteps(s)); }
