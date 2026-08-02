@@ -153,7 +153,7 @@ button:focus-visible{outline:2px solid var(--urgence); outline-offset:2px}
   <span class="astuce">Cliquez une case à portée pour vous y rendre · un ennemi cerclé pour tirer</span>
 </footer>
 
-<script>
+<script type="module">
 /* =========================================================================
    MOTEUR v2 — carte en CASES.
    Une tuile = une union de rectangles posée sur un quadrillage.
@@ -161,6 +161,16 @@ button:focus-visible{outline:2px solid var(--urgence); outline-offset:2px}
    l'arête entre deux cases précises. Les ennemis apparaissent sur les
    POINTS D'APPARITION imprimés sur les tuiles.
    ========================================================================= */
+import {
+  TUILES, PORTES, APPARITIONS, JETONS, ITEMS, ARMES, ENNEMIS, DE,
+  PORTEE_DEPLACEMENT, TENSION,
+  NOM_JOUEUR, PV_MAX, PA_MAX, CASE_DEPART, ARME_DEPART, SAC_MAX, SAC_DEPART,
+  POOL_JETONS_A, MUNITIONS_PAR_JETON, DECK_COUPE,
+  SOIN_HERBE_VERTE, SOIN_SOUFFLE, MUNITIONS_TROUVAILLE, BONUS_GROUILLE,
+  DIST_APPARITION, COUT_DEPLACEMENT, COUT_DEPLACEMENT_ENGAGE, GARDE_VUE,
+  JOURNAL_MAX, DECK_CRITIQUE, DELAI_FLIP_CARTE, SEED_MAX,
+  SECOUSSE_INITIALE, SECOUSSE_AMORTISSEMENT, SECOUSSE_SEUIL,
+} from './src/config.js';
 
 function makeRng(seed){ return { s: seed >>> 0 }; }
 function rnd(rng){
@@ -176,79 +186,6 @@ function shuffle(rng,arr){
   for(let i=a.length-1;i>0;i--){ const j=rndInt(rng,i+1); [a[i],a[j]]=[a[j],a[i]]; }
   return a;
 }
-
-/* ---------------------------------------------------------------- CARTE */
-// rects: [x, y, largeur, hauteur] en cases.
-const TUILES = [
-  { id:'couloir_n', nom:'Couloir nord',   rects:[[7,0,5,1]] },
-  { id:'bureau_o',  nom:'Bureau ouest',   rects:[[3,1,5,3]] },
-  { id:'vestiaire', nom:'Vestiaires',     rects:[[1,2,2,4]] },
-  { id:'hall',      nom:'Hall principal', rects:[[3,4,5,1],[3,5,1,3],[3,8,5,1],[7,5,1,3]] }, // anneau
-  { id:'sombre',    nom:'Chambre noire',  rects:[[4,5,3,3]] },                                // enclavée
-  { id:'couloir_s', nom:'Couloir sud',    rects:[[7,9,4,2]] },
-  { id:'bureau_e',  nom:'Bureau est',     rects:[[10,4,5,5]] },
-  { id:'armurerie', nom:'Armurerie',      rects:[[10,1,3,3]] },
-  { id:'parking',   nom:'Sortie parking', rects:[[13,9,3,2]] },
-];
-
-// Une porte relie deux cases adjacentes de deux tuiles différentes.
-const PORTES = [
-  { a:[7,0],  b:[7,1],  verrou:null },
-  { a:[10,0], b:[10,1], verrou:'cle_pique' },
-  { a:[3,2],  b:[2,2],  verrou:null },
-  { a:[5,3],  b:[5,4],  verrou:null },
-  { a:[2,5],  b:[3,5],  verrou:null },
-  { a:[4,4],  b:[4,5],  verrou:null },
-  { a:[7,8],  b:[7,9],  verrou:null },
-  { a:[10,9], b:[10,8], verrou:null },
-  { a:[10,3], b:[10,4], verrou:'cle_pique' },
-  { a:[13,8], b:[13,9], verrou:'carte' },
-];
-
-// Points d'apparition imprimés sur les tuiles.
-const APPARITIONS = [[8,0],[3,1],[1,2],[3,8],[7,5],[8,9],[14,4],[10,7],[5,7],[11,1]];
-
-// Jetons de fouille posés sur des cases précises.
-const JETONS = [
-  { c:[4,2], type:'A' }, { c:[6,1], type:'A' },
-  { c:[1,3], type:'A' }, { c:[2,4], type:'A' },
-  { c:[5,6], type:'B' },
-  { c:[11,5],type:'A' }, { c:[13,7],type:'A' },
-  { c:[9,0], type:'A' },
-  { c:[11,2],type:'B' },
-];
-
-const ITEMS = {
-  munitions:{ nom:'Munitions', pile:8 },
-  herbe_v:  { nom:'Herbe verte', pile:1 },
-  herbe_r:  { nom:'Herbe rouge', pile:1 },
-  cle_pique:{ nom:'Clé de pique', pile:1, cle:true },
-  carte:    { nom:'Carte magnétique', pile:1, cle:true },
-  pompe:    { nom:'Fusil à pompe', pile:1 },
-};
-const ARMES = {
-  couteau: { nom:'Couteau',       des:1, portee:1, mun:0, zone:false },
-  pistolet:{ nom:'Pistolet',      des:2, portee:5, mun:1, zone:false },
-  pompe:   { nom:'Fusil à pompe', des:3, portee:2, mun:1, zone:true  },
-};
-const ENNEMIS = {
-  zombie:{ nom:'Zombie', pv:4, degats:2, vitesse:2 },
-  chien: { nom:'Chien',  pv:3, degats:2, vitesse:4 },
-  licker:{ nom:'Licker', pv:6, degats:3, vitesse:3 },
-};
-const DE = [0,0,1,1,2,3];
-const PORTEE_DEPLACEMENT = 2; // cases parcourues par action de déplacement
-
-const TENSION = [
-  ...Array(4).fill({ id:'approche', titre:'Ils arrivent', texte:'Un zombie se relève sur un point d’apparition éloigné.' }),
-  ...Array(2).fill({ id:'grogne',   titre:'Grognements',  texte:'Ça se relève juste à côté.' }),
-  ...Array(2).fill({ id:'meute',    titre:'La meute',     texte:'Une vitre explose. Un chien entre.' }),
-  ...Array(2).fill({ id:'calme',    titre:'Silence',      texte:'Rien. Pour l’instant.' }),
-  { id:'souffle',   titre:'Reprendre souffle', texte:'Vous récupérez un point de vie.' },
-  { id:'grouille',  titre:'Ça grouille',       texte:'Tout ce qui rôde avance encore.' },
-  { id:'trouvaille',titre:'Fouille rapide',    texte:'Une boîte de munitions traînait là.' },
-  { id:'licker',    titre:'LICKER',            texte:'Il descend du plafond. Il vous a entendu.' },
-];
 
 /* --------------------------------------------------- index des cases */
 const CASES = new Map();       // "x,y" -> id de tuile
@@ -321,7 +258,7 @@ function vue(s, a, b){
   const dx=Math.abs(x1-x0), dy=Math.abs(y1-y0);
   const sx=x0<x1?1:-1, sy=y0<y1?1:-1;
   let err=dx-dy, prec=[x0,y0], garde=0;
-  while (garde++ < 200){
+  while (garde++ < GARDE_VUE){
     if (x0===x1 && y0===y1) return true;
     const e2=2*err;
     let nx=x0, ny=y0;
@@ -345,10 +282,9 @@ const distCases = (a,b) => Math.max(Math.abs(a[0]-b[0]), Math.abs(a[1]-b[1]));
 function creerPartie(seed){
   const rng = makeRng(seed);
 
-  const pool = ['munitions','munitions','herbe_v','rien','herbe_r','munitions','rien'];
   const jetons = JETONS.map(j => ({
     c: j.c, type: j.type,
-    contenu: j.type==='B' ? 'herbe_r' : pool[rndInt(rng,pool.length)],
+    contenu: j.type==='B' ? 'herbe_r' : POOL_JETONS_A[rndInt(rng,POOL_JETONS_A.length)],
   }));
   // L'armurerie est verrouillée : elle contient toujours la carte + le fusil.
   const jArm = jetons.find(j => tuileDe(j.c)==='armurerie');
@@ -359,12 +295,12 @@ function creerPartie(seed){
 
   const base = TENSION.filter(c=>c.id!=='licker');
   const licker = TENSION.find(c=>c.id==='licker');
-  const deck = [...shuffle(rng, base.slice(0,8)), ...shuffle(rng,[...base.slice(8), licker])];
+  const deck = [...shuffle(rng, base.slice(0,DECK_COUPE)), ...shuffle(rng,[...base.slice(DECK_COUPE), licker])];
 
   return {
-    seed, rng, tour:1, pa:4, paMax:4,
-    joueur:{ nom:'Leon', pv:10, pvMax:10, c:[3,4], arme:'pistolet' },
-    sac:[{id:'munitions',n:4},{id:'herbe_v',n:1}], sacMax:6,
+    seed, rng, tour:1, pa:PA_MAX, paMax:PA_MAX,
+    joueur:{ nom:NOM_JOUEUR, pv:PV_MAX, pvMax:PV_MAX, c:[...CASE_DEPART], arme:ARME_DEPART },
+    sac:SAC_DEPART.map(i=>({...i})), sacMax:SAC_MAX,
     ennemis:[], prochainId:1,
     jetons, portesOuvertes:[], deck, defausse:[],
     phase:'joueur', fin:null,
@@ -397,7 +333,7 @@ function actions(s){
 
   // Se dégager : quitter le contact d'un ennemi coûte une action de plus.
   const engage = s.ennemis.some(e => distCases(e.c, ici)===1 && passe(s, e.c, ici, true));
-  const coutDep = engage ? 2 : 1;
+  const coutDep = engage ? COUT_DEPLACEMENT_ENGAGE : COUT_DEPLACEMENT;
   if (s.pa >= coutDep){
     const d = distances(s, ici, false, PORTEE_DEPLACEMENT);
     for (const [k,dist] of d){
@@ -470,11 +406,11 @@ function jouer(s, action){
       j.pris = true;
       if (j.bonus){ ajouter(s,j.bonus); dit(s,`Trouvé : ${ITEMS[j.bonus].nom}.`,'bien'); }
       if (j.contenu==='rien') dit(s,'Des tiroirs vides.','mal');
-      else if (!ajouter(s, j.contenu, j.contenu==='munitions'?2:1)) dit(s,`${ITEMS[j.contenu].nom} — sac plein, laissé sur place.`,'mal');
+      else if (!ajouter(s, j.contenu, j.contenu==='munitions'?MUNITIONS_PAR_JETON:1)) dit(s,`${ITEMS[j.contenu].nom} — sac plein, laissé sur place.`,'mal');
       else dit(s,`Trouvé : ${ITEMS[j.contenu].nom}.`,'bien');
       break;
     }
-    case 'soigner': retirer(s,'herbe_v'); s.joueur.pv=Math.min(s.joueur.pvMax,s.joueur.pv+3); dit(s,'Herbe verte. +3 PV.','bien'); break;
+    case 'soigner': retirer(s,'herbe_v'); s.joueur.pv=Math.min(s.joueur.pvMax,s.joueur.pv+SOIN_HERBE_VERTE); dit(s,'Herbe verte. +3 PV.','bien'); break;
     case 'combiner': retirer(s,'herbe_v'); retirer(s,'herbe_r'); s.joueur.pv=s.joueur.pvMax; dit(s,'Verte + rouge. Santé complète.','bien'); break;
     case 'arme': s.joueur.arme=action.arme; dit(s,`Arme en main : ${ARMES[action.arme].nom}.`); break;
     case 'finir': s.pa=0; break;
@@ -526,13 +462,13 @@ function tirerTension(s){
   const c = s.deck.shift(); s.defausse.push(c); s.derniereCarte=c;
   dit(s, `TENSION — ${c.titre} : ${c.texte}`, 'tension');
   switch(c.id){
-    case 'approche': spawn(s,'zombie',6); break;
-    case 'grogne':   spawn(s,'zombie',1); break;
-    case 'meute':    spawn(s,'chien',4);  break;
-    case 'licker':   spawn(s,'licker',3); break;
-    case 'souffle':  s.joueur.pv=Math.min(s.joueur.pvMax,s.joueur.pv+1); break;
-    case 'trouvaille': ajouter(s,'munitions',2); break;
-    case 'grouille': activer(s,2); break;
+    case 'approche': spawn(s,'zombie',DIST_APPARITION.approche); break;
+    case 'grogne':   spawn(s,'zombie',DIST_APPARITION.grogne); break;
+    case 'meute':    spawn(s,'chien',DIST_APPARITION.meute);  break;
+    case 'licker':   spawn(s,'licker',DIST_APPARITION.licker); break;
+    case 'souffle':  s.joueur.pv=Math.min(s.joueur.pvMax,s.joueur.pv+SOIN_SOUFFLE); break;
+    case 'trouvaille': ajouter(s,'munitions',MUNITIONS_TROUVAILLE); break;
+    case 'grouille': activer(s,BONUS_GROUILLE); break;
   }
 }
 
@@ -585,7 +521,7 @@ function dessiner(){
   const W=cv.clientWidth, H=cv.clientHeight, t=G.t;
   ctx.clearRect(0,0,W,H);
   ctx.save();
-  if (secousse>0){ ctx.translate((Math.random()-.5)*secousse,(Math.random()-.5)*secousse); secousse*=.8; if(secousse<.4) secousse=0; }
+  if (secousse>0){ ctx.translate((Math.random()-.5)*secousse,(Math.random()-.5)*secousse); secousse*=SECOUSSE_AMORTISSEMENT; if(secousse<SECOUSSE_SEUIL) secousse=0; }
 
   // quadrillage de fond, comme la grille imprimée du plateau
   ctx.strokeStyle='#232A2E'; ctx.lineWidth=1;
@@ -726,7 +662,7 @@ cv.addEventListener('click', ev=>{
   const c = caseSous(ev); if(!c) return;
   const e = S.ennemis.find(e=>memeCase(e.c,c));
   if (e){
-    if (cibles.has(e.id)){ secousse=6; return acte(actions(S).find(a=>a.type==='attaquer'&&a.cible===e.id)); }
+    if (cibles.has(e.id)){ secousse=SECOUSSE_INITIALE; return acte(actions(S).find(a=>a.type==='attaquer'&&a.cible===e.id)); }
     const arme=ARMES[S.joueur.arme];
     S.log.push({t:'mal', m: nbMunitions(S)<arme.mun ? 'Chargeur vide.'
       : distCases(S.joueur.c,e.c)>arme.portee ? `Trop loin (portée ${arme.portee}).` : 'Pas de ligne de vue.'});
@@ -781,12 +717,12 @@ function maj(carteTiree=false){
   el('bFin').disabled=!!S.fin;
 
   const jn=el('journal');
-  jn.innerHTML=S.log.slice(-40).map(l=>`<p class="${l.t||''}">${l.m}</p>`).join('');
+  jn.innerHTML=S.log.slice(-JOURNAL_MAX).map(l=>`<p class="${l.t||''}">${l.m}</p>`).join('');
   jn.scrollTop=jn.scrollHeight;
 
   const rest=el('restant');
   rest.innerHTML='reste <b>'+S.deck.length+'</b> cartes';
-  rest.classList.toggle('critique', S.deck.length<=4);
+  rest.classList.toggle('critique', S.deck.length<=DECK_CRITIQUE);
 
   if (carteTiree && S.derniereCarte){
     const c=el('carte'); c.classList.add('flip');
@@ -795,7 +731,7 @@ function maj(carteTiree=false){
       el('cTexte').textContent=S.derniereCarte.texte;
       el('cNum').textContent='carte '+S.defausse.length;
       c.classList.remove('flip');
-    },260);
+    },DELAI_FLIP_CARTE);
   }
 
   dessiner();
@@ -822,7 +758,7 @@ clic('bArme',    ()=>{
 clic('bFin',     ()=>acte(actions(S).find(a=>a.type==='finir')));
 
 function nouvellePartie(seed){
-  const s = seed ?? (Math.floor(Math.random()*99999)+1);
+  const s = seed ?? (Math.floor(Math.random()*SEED_MAX)+1);
   S = creerPartie(s);
   S.derniereTuile = tuileDe(S.joueur.c);
   document.getElementById('mSeed').textContent = s;
@@ -831,6 +767,8 @@ function nouvellePartie(seed){
   document.getElementById('cNum').textContent='';
   taille(); maj();
 }
+// Le script est un module : la fonction doit être exposée pour l'onclick inline.
+window.nouvellePartie = nouvellePartie;
 nouvellePartie(Number(new URLSearchParams(location.search).get('seed')) || undefined);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(()=>taille());
 addEventListener('load', taille);
