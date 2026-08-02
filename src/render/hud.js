@@ -8,6 +8,15 @@ import { recompute, draw } from './canvas.js';
 const ICONS = { ammo:'▮', green_herb:'❦', red_herb:'❧', spade_key:'♠', keycard:'▤', shotgun:'⌐' };
 const PHASE_LABELS = { player:'À vous', enemies:'Les ennemis agissent', tension:'Tension' };
 
+// Transient phase banner over the board (CSS keyframes drive the fade in/out).
+export function banner(text, tone=''){
+  const b = document.getElementById('banner');
+  document.getElementById('bannerText').textContent = text;
+  b.className = '';
+  void b.offsetWidth; // restart the CSS animation
+  b.className = 'show'+(tone?' '+tone:'');
+}
+
 export function refresh(app, cardDrawn=false){
   const S = app.S;
   const p=S.player, weapon=WEAPONS[p.weapon], el=id=>document.getElementById(id);
@@ -50,6 +59,7 @@ export function refresh(app, cardDrawn=false){
 
   if (cardDrawn && S.lastCard){
     const c=el('card'); c.classList.add('flip');
+    const dk=el('deck'); dk.classList.remove('pull'); void dk.offsetWidth; dk.classList.add('pull');
     setTimeout(()=>{
       el('cardTitle').textContent=S.lastCard.title;
       el('cardText').textContent=S.lastCard.text;

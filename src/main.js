@@ -18,7 +18,7 @@ import { bindButtons } from './input/buttons.js';
 const cv = document.getElementById('board');
 const app = {
   cv, ctx: cv.getContext('2d'),
-  S:null, G:null, hover:null, reachable:new Map(), targets:new Set(), shake:0, focus:null,
+  S:null, G:null, hover:null, reachable:new Map(), targets:new Set(), shake:0, focus:null, fx:[], raf:false,
 };
 
 bindMouse(app, { act, refresh, draw });
@@ -28,6 +28,7 @@ addEventListener('resize', ()=>resize(app));
 function newGame(seed){
   const s = seed ?? (Math.floor(Math.random()*SEED_MAX)+1);
   app.S = createGame(s);
+  app.fx = []; app.focus = null;
   app.S.lastTile = tileAt(app.S.player.c);
   document.getElementById('seedNo').textContent = s;
   document.getElementById('cardTitle').textContent='Le calme';

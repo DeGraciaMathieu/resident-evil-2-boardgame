@@ -1,7 +1,7 @@
 /* =========================================================================
    RENDERING — 2D canvas, in cells. Reads the state, never writes into it.
    ========================================================================= */
-import { TILES, DOORS, SPAWN_POINTS, SHAKE_DAMPING, SHAKE_THRESHOLD } from '../config.js';
+import { TILES, DOORS, SPAWN_POINTS, SHAKE_DAMPING, SHAKE_THRESHOLD, FX_DURATION } from '../config.js';
 import { BOUNDS, key } from '../rules/board.js';
 import { actions } from '../rules/actions.js';
 
@@ -25,6 +25,13 @@ export function geometry(app){
   app.G = { t, ox: Math.round((W - t*BOUNDS.w)/2), oy: Math.round((H - t*BOUNDS.h)/2) };
 }
 
+// Cosmetic transient effect (tween, spawn pop, floating damage), pure presentation.
+export function addFx(app, fx){
+  app.fx.push({ ...fx, t0: performance.now(), dur: FX_DURATION[fx.kind] });
+}
+
+const easeOut = p => p*(2-p);
+
 export function recompute(app){
   app.reachable = new Map(); app.targets = new Set();
   if (!app.S || app.S.over) return;
@@ -41,6 +48,8 @@ export function draw(app){
   const G = app.G;
   const px = (c) => [G.ox + c[0]*G.t, G.oy + c[1]*G.t];
   const W=cv.clientWidth, H=cv.clientHeight, t=G.t;
+  const now = performance.now();
+  if (app.fx.length) app.fx = app.fx.filter(f => now - f.t0 < f.dur);
   ctx.clearRect(0,0,W,H);
   ctx.save();
   if (app.shake>0){ ctx.translate((Math.random()-.5)*app.shake,(Math.random()-.5)*app.shake); app.shake*=SHAKE_DAMPING; if(app.shake<SHAKE_THRESHOLD) app.shake=0; }
@@ -131,9 +140,23 @@ export function draw(app){
     ctx.fillRect(a+1,b+1,t-2,t-2);
   }
 
-  // enemies
+  // enemies — a tween fx slides them between cells, a spawn fx scales them in
   for (const e of S.enemies){
-    const [a,b]=px(e.c), cx=a+t/2, cy=b+t/2, r=t*.34;
+    let cell = e.c, scale = 1;
+    const tw = app.fx.find(f=>f.kind==='tween' && f.id===e.id);
+    if (tw){
+      const p = easeOut(Math.min(1,(now-tw.t0)/tw.dur));
+      cell = [tw.from[0]+(tw.to[0]-tw.from[0])*p, tw.from[1]+(tw.to[1]-tw.from[1])*p];
+    }
+    const [a,b]=px(cell), cx=a+t/2, cy=b+t/2;
+    const sp = app.fx.find(f=>f.kind==='spawn' && f.id===e.id);
+    if (sp){
+      const p = Math.min(1,(now-sp.t0)/sp.dur);
+      scale = easeOut(p);
+      ctx.strokeStyle=`rgba(200,106,106,${1-p})`; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.arc(cx,cy,t*(.2+.5*p),0,7); ctx.stroke();
+    }
+    const r=t*.34*scale;
     if (app.targets.has(e.id)){
       ctx.strokeStyle='#E2A03F'; ctx.lineWidth=2;
       ctx.beginPath(); ctx.arc(cx,cy,r+4,0,7); ctx.stroke();
@@ -162,6 +185,20 @@ export function draw(app){
   ctx.font=`800 ${Math.max(10,Math.round(t*.42))}px "Big Shoulders Display", sans-serif`;
   ctx.fillText('L', cx, cy+1);
 
+  // floating damage over the struck cell
+  for (const f of app.fx){
+    if (f.kind!=='hit') continue;
+    const p=(now-f.t0)/f.dur, [a,b]=px(f.c);
+    ctx.globalAlpha=1-p;
+    ctx.fillStyle='#C86A6A'; ctx.textAlign='center'; ctx.textBaseline='bottom';
+    ctx.font=`800 ${Math.max(12,Math.round(t*.5))}px "Big Shoulders Display", sans-serif`;
+    ctx.fillText(`−${f.dmg}`, a+t/2, b - p*t*.5);
+    ctx.globalAlpha=1;
+  }
+
   ctx.restore();
-  if (app.shake>0) requestAnimationFrame(()=>draw(app));
+  if ((app.shake>0 || app.fx.length) && !app.raf){
+    app.raf = true;
+    requestAnimationFrame(()=>{ app.raf=false; draw(app); });
+  }
 }

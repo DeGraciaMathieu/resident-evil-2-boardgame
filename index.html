@@ -52,6 +52,8 @@ canvas{display:block; width:100%; height:100%}
 .slot .n{font-size:10px; color:var(--warning); font-weight:700}
 .slot.key{border-color:var(--warning); background:rgba(226,160,63,.12)}
 .deck{perspective:900px}
+.deck.pull{animation:pull .8s cubic-bezier(.2,.7,.3,1)}
+@keyframes pull{0%{transform:translateY(0)} 30%{transform:translateY(-12px) rotate(-2.5deg)} 100%{transform:translateY(0)}}
 .card{position:relative; aspect-ratio:5/7; transform-style:preserve-3d; transition:transform .45s cubic-bezier(.2,.7,.3,1)}
 .card.flip{transform:rotateY(180deg)}
 .face{position:absolute; inset:0; backface-visibility:hidden; padding:11px; display:flex; flex-direction:column}
@@ -86,6 +88,13 @@ button.red{border-color:#6A2A2A; color:#D08585}
 button.red:hover:not(:disabled){background:var(--blood); color:var(--paper); border-color:var(--blood)}
 button:focus-visible{outline:2px solid var(--warning); outline-offset:2px}
 .hint{font-size:11px; color:#5F7278; margin-left:auto}
+#banner{position:absolute; inset:0; display:grid; place-content:center; pointer-events:none; z-index:4; opacity:0}
+#banner.show{animation:banner 1.4s cubic-bezier(.2,.7,.3,1) forwards}
+#banner span{font-family:var(--display); font-size:44px; font-weight:800; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--paper); text-shadow:0 2px 18px rgba(0,0,0,.85); background:rgba(9,14,16,.6);
+  padding:7px 28px 3px; border-top:1px solid #2A3B42; border-bottom:1px solid #2A3B42}
+#banner.enemy span{color:#C86A6A} #banner.tension span{color:var(--warning)} #banner.player span{color:var(--paper)}
+@keyframes banner{0%{opacity:0; transform:scale(.92)} 12%{opacity:1; transform:scale(1)} 78%{opacity:1} 100%{opacity:0; transform:scale(1.02)}}
 #gameOver{position:absolute; inset:0; display:none; place-content:center; text-align:center;
   background:rgba(9,14,16,.92); z-index:5; padding:20px}
 #gameOver.on{display:grid}
@@ -99,7 +108,7 @@ button:focus-visible{outline:2px solid var(--warning); outline-offset:2px}
   #scene{order:-1; min-height:280px}
   .deck{max-width:110px} #log{max-height:110px}
 }
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
 </style>
 </head>
 <body>
@@ -122,13 +131,14 @@ button:focus-visible{outline:2px solid var(--warning); outline-offset:2px}
   </aside>
   <div id="scene">
     <canvas id="board"></canvas>
+    <div id="banner"><span id="bannerText"></span></div>
     <div id="gameOver"><div><h2 id="gameOverTitle"></h2><p id="gameOverText"></p>
       <button onclick="newGame()">Nouvelle partie</button></div></div>
   </div>
   <aside class="right">
     <div>
       <p class="title">Tension</p>
-      <div class="deck"><div class="card" id="card">
+      <div class="deck" id="deck"><div class="card" id="card">
         <div class="face front">
           <div class="tag">Pioche de tension</div>
           <h3 id="cardTitle">Le calme</h3>
