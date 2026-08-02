@@ -1,51 +1,51 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { tirerTension } from '../src/rules/tension.js';
+import { drawTension } from '../src/rules/tension.js';
 
 const base = () => ({
-  fin: null, log: [],
-  joueur: { pv: 8, pvMax: 10, c: [3,4] },
-  sac: [], sacMax: 6, ennemis: [], prochainId: 1, portesOuvertes: [],
-  deck: [], defausse: [], derniereCarte: undefined,
+  over: null, log: [],
+  player: { hp: 8, maxHp: 10, c: [3,4] },
+  bag: [], bagMax: 6, enemies: [], nextId: 1, openedDoors: [],
+  deck: [], discard: [], lastCard: undefined,
 });
 
-test('piocher dans un deck vide fait perdre la partie', () => {
+test('drawing from an empty deck loses the game', () => {
   const s = base();
-  tirerTension(s);
-  assert.equal(s.fin, 'defaite');
+  drawTension(s);
+  assert.equal(s.over, 'defeat');
 });
 
-test('la carte tirée passe du deck à la défausse', () => {
+test('the drawn card moves from the deck to the discard pile', () => {
   const s = base();
-  s.deck = [{ id:'calme', titre:'Silence', texte:'Rien.' }];
-  tirerTension(s);
+  s.deck = [{ id:'calm', title:'Silence', text:'Rien.' }];
+  drawTension(s);
   assert.equal(s.deck.length, 0);
-  assert.equal(s.defausse.length, 1);
-  assert.equal(s.derniereCarte.id, 'calme');
+  assert.equal(s.discard.length, 1);
+  assert.equal(s.lastCard.id, 'calm');
 });
 
-test('« Ils arrivent » fait apparaître un zombie', () => {
+test('« Ils arrivent » spawns a zombie', () => {
   const s = base();
-  s.deck = [{ id:'approche', titre:'Ils arrivent', texte:'…' }];
-  tirerTension(s);
-  assert.equal(s.ennemis.length, 1);
-  assert.equal(s.ennemis[0].type, 'zombie');
+  s.deck = [{ id:'approach', title:'Ils arrivent', text:'…' }];
+  drawTension(s);
+  assert.equal(s.enemies.length, 1);
+  assert.equal(s.enemies[0].type, 'zombie');
 });
 
-test('« Reprendre souffle » rend un point de vie sans dépasser le maximum', () => {
+test('« Reprendre souffle » heals one hp without exceeding the maximum', () => {
   const s = base();
-  s.deck = [{ id:'souffle', titre:'Reprendre souffle', texte:'…' }];
-  tirerTension(s);
-  assert.equal(s.joueur.pv, 9);
-  s.deck = [{ id:'souffle', titre:'Reprendre souffle', texte:'…' }];
-  s.joueur.pv = 10;
-  tirerTension(s);
-  assert.equal(s.joueur.pv, 10);
+  s.deck = [{ id:'breath', title:'Reprendre souffle', text:'…' }];
+  drawTension(s);
+  assert.equal(s.player.hp, 9);
+  s.deck = [{ id:'breath', title:'Reprendre souffle', text:'…' }];
+  s.player.hp = 10;
+  drawTension(s);
+  assert.equal(s.player.hp, 10);
 });
 
-test('« Fouille rapide » donne deux munitions', () => {
+test('« Fouille rapide » grants two rounds of ammo', () => {
   const s = base();
-  s.deck = [{ id:'trouvaille', titre:'Fouille rapide', texte:'…' }];
-  tirerTension(s);
-  assert.deepEqual(s.sac, [{id:'munitions',n:2}]);
+  s.deck = [{ id:'stash', title:'Fouille rapide', text:'…' }];
+  drawTension(s);
+  assert.deepEqual(s.bag, [{id:'ammo',n:2}]);
 });

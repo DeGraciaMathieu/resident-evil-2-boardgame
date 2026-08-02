@@ -1,20 +1,20 @@
-/* Deck de tension : pioche et résolution de la carte. */
-import { DIST_APPARITION, SOIN_SOUFFLE, MUNITIONS_TROUVAILLE, BONUS_GROUILLE } from '../config.js';
-import { ajouter } from './sac.js';
-import { activer, spawn } from './ennemis.js';
-import { dit } from './journal.js';
+/* Tension deck: drawing and resolving the card. */
+import { SPAWN_DIST, BREATH_HEAL, STASH_AMMO, SWARM_BONUS } from '../config.js';
+import { addItem } from './bag.js';
+import { activate, spawn } from './enemies.js';
+import { say } from './log.js';
 
-export function tirerTension(s){
-  if (!s.deck.length){ s.fin='defaite'; dit(s,'Le bâtiment est submergé. Plus aucune issue.','mal'); return; }
-  const c = s.deck.shift(); s.defausse.push(c); s.derniereCarte=c;
-  dit(s, `TENSION — ${c.titre} : ${c.texte}`, 'tension');
+export function drawTension(s){
+  if (!s.deck.length){ s.over='defeat'; say(s,'Le bâtiment est submergé. Plus aucune issue.','bad'); return; }
+  const c = s.deck.shift(); s.discard.push(c); s.lastCard=c;
+  say(s, `TENSION — ${c.title} : ${c.text}`, 'tension');
   switch(c.id){
-    case 'approche': spawn(s,'zombie',DIST_APPARITION.approche); break;
-    case 'grogne':   spawn(s,'zombie',DIST_APPARITION.grogne); break;
-    case 'meute':    spawn(s,'chien',DIST_APPARITION.meute);  break;
-    case 'licker':   spawn(s,'licker',DIST_APPARITION.licker); break;
-    case 'souffle':  s.joueur.pv=Math.min(s.joueur.pvMax,s.joueur.pv+SOIN_SOUFFLE); break;
-    case 'trouvaille': ajouter(s,'munitions',MUNITIONS_TROUVAILLE); break;
-    case 'grouille': activer(s,BONUS_GROUILLE); break;
+    case 'approach': spawn(s,'zombie',SPAWN_DIST.approach); break;
+    case 'growl':    spawn(s,'zombie',SPAWN_DIST.growl); break;
+    case 'pack':     spawn(s,'dog',SPAWN_DIST.pack);  break;
+    case 'licker':   spawn(s,'licker',SPAWN_DIST.licker); break;
+    case 'breath':   s.player.hp=Math.min(s.player.maxHp,s.player.hp+BREATH_HEAL); break;
+    case 'stash':    addItem(s,'ammo',STASH_AMMO); break;
+    case 'swarm':    activate(s,SWARM_BONUS); break;
   }
 }

@@ -3,44 +3,44 @@ import assert from 'node:assert/strict';
 import { actions } from '../src/rules/actions.js';
 
 const base = () => ({
-  pa: 4, phase: 'joueur', fin: null,
-  joueur: { pv: 10, pvMax: 10, c: [3,4], arme: 'pistolet' },
-  sac: [{id:'munitions',n:4}], sacMax: 6,
-  ennemis: [], jetons: [], portesOuvertes: [],
+  ap: 4, phase: 'player', over: null,
+  player: { hp: 10, maxHp: 10, c: [3,4], weapon: 'pistol' },
+  bag: [{id:'ammo',n:4}], bagMax: 6,
+  enemies: [], tokens: [], openedDoors: [],
 });
 
-test('hors de la phase joueur ou partie finie, aucune action n’est possible', () => {
-  assert.deepEqual(actions({ ...base(), phase: 'ennemis' }), []);
-  assert.deepEqual(actions({ ...base(), fin: 'defaite' }), []);
+test('outside the player phase or once the game is over, no action is possible', () => {
+  assert.deepEqual(actions({ ...base(), phase: 'enemies' }), []);
+  assert.deepEqual(actions({ ...base(), over: 'defeat' }), []);
 });
 
-test('fouiller n’est proposé que sur un jeton non encore pris', () => {
+test('searching is only offered on a token not yet taken', () => {
   const s = base();
-  s.jetons = [{ c:[3,4], type:'A', contenu:'munitions' }];
-  assert.ok(actions(s).some(a => a.type === 'fouiller'));
-  s.jetons[0].pris = true;
-  assert.ok(!actions(s).some(a => a.type === 'fouiller'));
+  s.tokens = [{ c:[3,4], type:'A', content:'ammo' }];
+  assert.ok(actions(s).some(a => a.type === 'search'));
+  s.tokens[0].taken = true;
+  assert.ok(!actions(s).some(a => a.type === 'search'));
 });
 
-test('se dégager du contact d’un ennemi coûte deux actions', () => {
+test('disengaging from an enemy in contact costs two actions', () => {
   const s = base();
-  s.ennemis = [{ id:1, c:[4,4], pv:4 }];
-  const dep = actions(s).find(a => a.type === 'deplacer');
-  assert.equal(dep.cout, 2);
-  assert.equal(dep.degage, true);
+  s.enemies = [{ id:1, c:[4,4], hp:4 }];
+  const move = actions(s).find(a => a.type === 'move');
+  assert.equal(move.cost, 2);
+  assert.equal(move.disengage, true);
 });
 
-test('attaquer exige des munitions et une cible en vue à portée', () => {
+test('attacking requires ammo and a visible target within range', () => {
   const s = base();
-  s.ennemis = [{ id:1, c:[5,4], pv:4 }]; // à 2 cases, en vue, portée pistolet 5
-  assert.ok(actions(s).some(a => a.type === 'attaquer' && a.cible === 1));
-  s.sac = []; // chargeur vide
-  assert.ok(!actions(s).some(a => a.type === 'attaquer'));
+  s.enemies = [{ id:1, c:[5,4], hp:4 }]; // 2 cells away, in sight, pistol range 5
+  assert.ok(actions(s).some(a => a.type === 'attack' && a.target === 1));
+  s.bag = []; // empty magazine
+  assert.ok(!actions(s).some(a => a.type === 'attack'));
 });
 
-test('changer d’arme ne propose le fusil à pompe que s’il est dans le sac', () => {
+test('switching weapons only offers the shotgun when it is in the bag', () => {
   const s = base();
-  assert.ok(!actions(s).some(a => a.type === 'arme' && a.arme === 'pompe'));
-  s.sac.push({id:'pompe',n:1});
-  assert.ok(actions(s).some(a => a.type === 'arme' && a.arme === 'pompe'));
+  assert.ok(!actions(s).some(a => a.type === 'weapon' && a.weapon === 'shotgun'));
+  s.bag.push({id:'shotgun',n:1});
+  assert.ok(actions(s).some(a => a.type === 'weapon' && a.weapon === 'shotgun'));
 });

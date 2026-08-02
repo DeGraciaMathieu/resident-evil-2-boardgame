@@ -1,68 +1,68 @@
-/* HUD — fiche joueur, sac, journal, carte tension, écran de fin. */
-import { ITEMS, ARMES, JOURNAL_MAX, DECK_CRITIQUE, DELAI_FLIP_CARTE } from '../config.js';
-import { tuileDe, tuile } from '../rules/plateau.js';
-import { nbMunitions } from '../rules/sac.js';
+/* HUD — player sheet, bag, log, tension card, game-over screen. */
+import { ITEMS, WEAPONS, LOG_MAX, DECK_CRITICAL, CARD_FLIP_DELAY } from '../config.js';
+import { tileAt, tile } from '../rules/board.js';
+import { ammoCount } from '../rules/bag.js';
 import { actions } from '../rules/actions.js';
-import { recalculer, dessiner } from './canvas.js';
+import { recompute, draw } from './canvas.js';
 
-const ICONES = { munitions:'▮', herbe_v:'❦', herbe_r:'❧', cle_pique:'♠', carte:'▤', pompe:'⌐' };
+const ICONS = { ammo:'▮', green_herb:'❦', red_herb:'❧', spade_key:'♠', keycard:'▤', shotgun:'⌐' };
 
-export function maj(app, carteTiree=false){
+export function refresh(app, cardDrawn=false){
   const S = app.S;
-  const j=S.joueur, arme=ARMES[j.arme], el=id=>document.getElementById(id);
-  recalculer(app);
-  el('mTour').textContent=S.tour;
-  el('arme').textContent=arme.nom;
-  el('des').textContent=arme.des+' / '+arme.portee+(arme.zone?' zone':'');
-  el('mun').textContent=nbMunitions(S);
-  el('lieu').textContent=tuile(tuileDe(j.c)).nom;
+  const p=S.player, weapon=WEAPONS[p.weapon], el=id=>document.getElementById(id);
+  recompute(app);
+  el('turnNo').textContent=S.turn;
+  el('weapon').textContent=weapon.name;
+  el('dice').textContent=weapon.dice+' / '+weapon.range+(weapon.area?' zone':'');
+  el('ammo').textContent=ammoCount(S);
+  el('location').textContent=tile(tileAt(p.c)).name;
 
-  const pv=el('pv'); pv.innerHTML='';
-  for(let i=0;i<j.pvMax;i++){ const b=document.createElement('i'); if(i<j.pv) b.className=j.pv<=3?'on bas':'on'; pv.appendChild(b); }
-  const pa=el('pa'); pa.innerHTML='';
-  for(let i=0;i<S.paMax;i++){ const b=document.createElement('i'); if(i<S.pa) b.className='on'; pa.appendChild(b); }
+  const hp=el('hp'); hp.innerHTML='';
+  for(let i=0;i<p.maxHp;i++){ const b=document.createElement('i'); if(i<p.hp) b.className=p.hp<=3?'on low':'on'; hp.appendChild(b); }
+  const ap=el('ap'); ap.innerHTML='';
+  for(let i=0;i<S.maxAp;i++){ const b=document.createElement('i'); if(i<S.ap) b.className='on'; ap.appendChild(b); }
 
-  const sac=el('sac'); sac.innerHTML='';
-  for(let i=0;i<S.sacMax;i++){
-    const it=S.sac[i], d=document.createElement('div');
-    d.className='slot'+(it?' plein':'')+(it&&ITEMS[it.id].cle?' cle':'');
-    if(it) d.innerHTML=`<span class="ic">${ICONES[it.id]||'?'}</span><span class="nm">${ITEMS[it.id].nom}</span>`+(it.n>1?`<span class="n">×${it.n}</span>`:'');
-    sac.appendChild(d);
+  const bag=el('bag'); bag.innerHTML='';
+  for(let i=0;i<S.bagMax;i++){
+    const it=S.bag[i], d=document.createElement('div');
+    d.className='slot'+(it?' full':'')+(it&&ITEMS[it.id].key?' key':'');
+    if(it) d.innerHTML=`<span class="ic">${ICONS[it.id]||'?'}</span><span class="nm">${ITEMS[it.id].name}</span>`+(it.n>1?`<span class="n">×${it.n}</span>`:'');
+    bag.appendChild(d);
   }
 
   const acts=actions(S);
-  el('bFouiller').disabled=!acts.some(a=>a.type==='fouiller');
-  el('bSoin').disabled=!acts.some(a=>a.type==='soigner');
-  el('bComb').disabled=!acts.some(a=>a.type==='combiner');
-  el('bArme').disabled=!acts.some(a=>a.type==='arme');
-  el('bFin').disabled=!!S.fin;
+  el('btnSearch').disabled=!acts.some(a=>a.type==='search');
+  el('btnHeal').disabled=!acts.some(a=>a.type==='heal');
+  el('btnCombine').disabled=!acts.some(a=>a.type==='combine');
+  el('btnWeapon').disabled=!acts.some(a=>a.type==='weapon');
+  el('btnEndTurn').disabled=!!S.over;
 
-  const jn=el('journal');
-  jn.innerHTML=S.log.slice(-JOURNAL_MAX).map(l=>`<p class="${l.t||''}">${l.m}</p>`).join('');
-  jn.scrollTop=jn.scrollHeight;
+  const lg=el('log');
+  lg.innerHTML=S.log.slice(-LOG_MAX).map(l=>`<p class="${l.t||''}">${l.m}</p>`).join('');
+  lg.scrollTop=lg.scrollHeight;
 
-  const rest=el('restant');
+  const rest=el('remaining');
   rest.innerHTML='reste <b>'+S.deck.length+'</b> cartes';
-  rest.classList.toggle('critique', S.deck.length<=DECK_CRITIQUE);
+  rest.classList.toggle('critical', S.deck.length<=DECK_CRITICAL);
 
-  if (carteTiree && S.derniereCarte){
-    const c=el('carte'); c.classList.add('flip');
+  if (cardDrawn && S.lastCard){
+    const c=el('card'); c.classList.add('flip');
     setTimeout(()=>{
-      el('cTitre').textContent=S.derniereCarte.titre;
-      el('cTexte').textContent=S.derniereCarte.texte;
-      el('cNum').textContent='carte '+S.defausse.length;
+      el('cardTitle').textContent=S.lastCard.title;
+      el('cardText').textContent=S.lastCard.text;
+      el('cardNum').textContent='carte '+S.discard.length;
       c.classList.remove('flip');
-    },DELAI_FLIP_CARTE);
+    },CARD_FLIP_DELAY);
   }
 
-  dessiner(app);
+  draw(app);
 
-  const fin=el('fin');
-  if (S.fin){
-    fin.className='on '+(S.fin==='victoire'?'gagne':'perdu');
-    el('finT').textContent=S.fin==='victoire'?'Sorti':'Terminé';
-    el('finP').textContent = S.fin==='victoire'
-      ? `Parking atteint au tour ${S.tour}, ${S.joueur.pv} PV restants.`
-      : S.joueur.pv<=0 ? 'Le RPD garde ses agents.' : 'La pioche de tension est vide. Le bâtiment est perdu.';
-  } else fin.className='';
+  const over=el('gameOver');
+  if (S.over){
+    over.className='on '+(S.over==='victory'?'won':'lost');
+    el('gameOverTitle').textContent=S.over==='victory'?'Sorti':'Terminé';
+    el('gameOverText').textContent = S.over==='victory'
+      ? `Parking atteint au tour ${S.turn}, ${S.player.hp} PV restants.`
+      : S.player.hp<=0 ? 'Le RPD garde ses agents.' : 'La pioche de tension est vide. Le bâtiment est perdu.';
+  } else over.className='';
 }

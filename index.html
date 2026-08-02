@@ -10,93 +10,93 @@
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@400;600;800&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
-  --nuit:#0E1518; --grille:#2B3237; --papier:#BFB394; --papier-sombre:#9C9174; --encre:#1A1A16;
-  --sang:#7E1C1C; --urgence:#E2A03F; --herbe:#5C8A4E;
+  --night:#0E1518; --grid:#2B3237; --paper:#BFB394; --paper-dark:#9C9174; --ink:#1A1A16;
+  --blood:#7E1C1C; --warning:#E2A03F; --herb:#5C8A4E;
   --display:"Big Shoulders Display",Impact,sans-serif;
   --mono:"Courier Prime",ui-monospace,monospace;
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:var(--nuit); color:var(--papier); font-family:var(--mono); font-size:14px;
+body{background:var(--night); color:var(--paper); font-family:var(--mono); font-size:14px;
   display:flex; flex-direction:column; overflow:hidden;
   background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.014) 0 1px,transparent 1px 3px)}
 header{display:flex; align-items:baseline; gap:14px; padding:8px 14px; border-bottom:1px solid #2A3B42; flex-wrap:wrap}
 header h1{font-family:var(--display); font-weight:800; font-size:22px; letter-spacing:.08em; margin:0; text-transform:uppercase}
-header h1 span{color:var(--sang)}
+header h1 span{color:var(--blood)}
 .meta{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#6E8188; margin-left:auto}
-.meta b{color:var(--urgence); font-weight:400}
+.meta b{color:var(--warning); font-weight:400}
 main{flex:1; display:grid; grid-template-columns:200px 1fr 244px; min-height:0}
 aside{padding:12px; overflow:auto; display:flex; flex-direction:column; gap:14px}
-aside.gauche{border-right:1px solid #2A3B42}
-aside.droite{border-left:1px solid #2A3B42}
+aside.left{border-right:1px solid #2A3B42}
+aside.right{border-left:1px solid #2A3B42}
 #scene{position:relative; min-width:0; min-height:0}
 canvas{display:block; width:100%; height:100%}
-.fiche{background:var(--papier); color:var(--encre); padding:10px 11px 12px;
+.sheet{background:var(--paper); color:var(--ink); padding:10px 11px 12px;
   box-shadow:0 1px 0 #6E6551,0 10px 22px rgba(0,0,0,.45)}
-.fiche h2{font-family:var(--display); font-size:26px; font-weight:800; margin:0; line-height:.9; text-transform:uppercase}
-.fiche .role{font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#5C5643; margin-bottom:9px}
-.jauge{display:flex; gap:3px; margin:2px 0 8px}
-.jauge i{flex:1; height:11px; background:#9C9174}
-.jauge i.on{background:var(--sang)} .jauge i.bas{background:var(--urgence)}
-.ligne{display:flex; justify-content:space-between; font-size:12px; border-top:1px dotted #83795F; padding:4px 0}
-.ligne b{font-weight:700}
-.titre{font-family:var(--display); font-size:15px; letter-spacing:.16em; text-transform:uppercase;
+.sheet h2{font-family:var(--display); font-size:26px; font-weight:800; margin:0; line-height:.9; text-transform:uppercase}
+.sheet .role{font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#5C5643; margin-bottom:9px}
+.gauge{display:flex; gap:3px; margin:2px 0 8px}
+.gauge i{flex:1; height:11px; background:#9C9174}
+.gauge i.on{background:var(--blood)} .gauge i.low{background:var(--warning)}
+.row{display:flex; justify-content:space-between; font-size:12px; border-top:1px dotted #83795F; padding:4px 0}
+.row b{font-weight:700}
+.title{font-family:var(--display); font-size:15px; letter-spacing:.16em; text-transform:uppercase;
   color:#7E939A; border-bottom:1px solid #2A3B42; padding-bottom:3px; margin:0 0 7px}
-.sac{display:grid; grid-template-columns:1fr 1fr; gap:5px}
+.bag{display:grid; grid-template-columns:1fr 1fr; gap:5px}
 .slot{aspect-ratio:1; border:1px dashed #37505A; display:flex; flex-direction:column; align-items:center;
   justify-content:center; gap:1px; padding:3px; text-align:center}
-.slot.plein{border:1px solid var(--papier-sombre); background:rgba(191,179,148,.09)}
+.slot.full{border:1px solid var(--paper-dark); background:rgba(191,179,148,.09)}
 .slot .ic{font-size:19px; line-height:1}
 .slot .nm{font-size:8.5px; letter-spacing:.04em; color:#9AAAAF; text-transform:uppercase}
-.slot .n{font-size:10px; color:var(--urgence); font-weight:700}
-.slot.cle{border-color:var(--urgence); background:rgba(226,160,63,.12)}
+.slot .n{font-size:10px; color:var(--warning); font-weight:700}
+.slot.key{border-color:var(--warning); background:rgba(226,160,63,.12)}
 .deck{perspective:900px}
-.carte{position:relative; aspect-ratio:5/7; transform-style:preserve-3d; transition:transform .45s cubic-bezier(.2,.7,.3,1)}
-.carte.flip{transform:rotateY(180deg)}
+.card{position:relative; aspect-ratio:5/7; transform-style:preserve-3d; transition:transform .45s cubic-bezier(.2,.7,.3,1)}
+.card.flip{transform:rotateY(180deg)}
 .face{position:absolute; inset:0; backface-visibility:hidden; padding:11px; display:flex; flex-direction:column}
-.face.dos{background:repeating-linear-gradient(45deg,rgba(0,0,0,.22) 0 6px,transparent 6px 12px),linear-gradient(160deg,#3A1414,#1D0B0B);
+.face.back{background:repeating-linear-gradient(45deg,rgba(0,0,0,.22) 0 6px,transparent 6px 12px),linear-gradient(160deg,#3A1414,#1D0B0B);
   border:1px solid #542020; align-items:center; justify-content:center; transform:rotateY(180deg)}
-.face.dos span{font-family:var(--display); font-size:32px; font-weight:800; letter-spacing:.2em; color:#7E1C1C;
+.face.back span{font-family:var(--display); font-size:32px; font-weight:800; letter-spacing:.2em; color:#7E1C1C;
   text-transform:uppercase; writing-mode:vertical-rl}
-.face.avant{background:var(--papier); color:var(--encre); border:1px solid #8C8267}
-.face.avant .tag{font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--sang)}
-.face.avant h3{font-family:var(--display); font-weight:800; font-size:26px; line-height:.92; margin:3px 0 8px; text-transform:uppercase}
-.face.avant p{margin:0; font-size:12px; line-height:1.35; font-style:italic; color:#3A3628}
-.face.avant .num{margin-top:auto; font-size:10px; letter-spacing:.14em; color:#6E6551}
-.restant{display:flex; align-items:baseline; gap:6px; margin-top:8px; font-size:11px; letter-spacing:.1em;
+.face.front{background:var(--paper); color:var(--ink); border:1px solid #8C8267}
+.face.front .tag{font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--blood)}
+.face.front h3{font-family:var(--display); font-weight:800; font-size:26px; line-height:.92; margin:3px 0 8px; text-transform:uppercase}
+.face.front p{margin:0; font-size:12px; line-height:1.35; font-style:italic; color:#3A3628}
+.face.front .num{margin-top:auto; font-size:10px; letter-spacing:.14em; color:#6E6551}
+.remaining{display:flex; align-items:baseline; gap:6px; margin-top:8px; font-size:11px; letter-spacing:.1em;
   text-transform:uppercase; color:#6E8188}
-.restant b{font-family:var(--display); font-size:26px; font-weight:800; color:var(--urgence)}
-.restant.critique b{color:var(--sang)}
-#journal{flex:1; overflow:auto; font-size:11.5px; line-height:1.45; min-height:80px}
-#journal p{margin:0 0 3px; padding-left:11px; text-indent:-11px; color:#8FA2A8}
-#journal p::before{content:"› "; color:#4B5F66}
-#journal p.bien{color:var(--herbe)} #journal p.mal{color:#C86A6A}
-#journal p.tension{color:var(--urgence)} #journal p.sys{color:#6E8188; font-style:italic}
+.remaining b{font-family:var(--display); font-size:26px; font-weight:800; color:var(--warning)}
+.remaining.critical b{color:var(--blood)}
+#log{flex:1; overflow:auto; font-size:11.5px; line-height:1.45; min-height:80px}
+#log p{margin:0 0 3px; padding-left:11px; text-indent:-11px; color:#8FA2A8}
+#log p::before{content:"› "; color:#4B5F66}
+#log p.good{color:var(--herb)} #log p.bad{color:#C86A6A}
+#log p.tension{color:var(--warning)} #log p.sys{color:#6E8188; font-style:italic}
 footer{border-top:1px solid #2A3B42; padding:9px 14px; display:flex; align-items:center; gap:12px; flex-wrap:wrap}
-.pa{display:flex; align-items:center; gap:6px; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#6E8188}
-.pa i{width:12px; height:12px; border:1px solid var(--urgence); border-radius:50%; display:block}
-.pa i.on{background:var(--urgence)}
+.ap{display:flex; align-items:center; gap:6px; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#6E8188}
+.ap i{width:12px; height:12px; border:1px solid var(--warning); border-radius:50%; display:block}
+.ap i.on{background:var(--warning)}
 button{font-family:var(--display); font-size:15px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
-  padding:6px 13px 4px; background:transparent; color:var(--papier); border:1px solid #45606A; cursor:pointer;
+  padding:6px 13px 4px; background:transparent; color:var(--paper); border:1px solid #45606A; cursor:pointer;
   transition:background .12s,color .12s}
-button:hover:not(:disabled){background:var(--papier); color:var(--encre); border-color:var(--papier)}
+button:hover:not(:disabled){background:var(--paper); color:var(--ink); border-color:var(--paper)}
 button:disabled{opacity:.3; cursor:not-allowed}
-button.rouge{border-color:#6A2A2A; color:#D08585}
-button.rouge:hover:not(:disabled){background:var(--sang); color:var(--papier); border-color:var(--sang)}
-button:focus-visible{outline:2px solid var(--urgence); outline-offset:2px}
-.astuce{font-size:11px; color:#5F7278; margin-left:auto}
-#fin{position:absolute; inset:0; display:none; place-content:center; text-align:center;
+button.red{border-color:#6A2A2A; color:#D08585}
+button.red:hover:not(:disabled){background:var(--blood); color:var(--paper); border-color:var(--blood)}
+button:focus-visible{outline:2px solid var(--warning); outline-offset:2px}
+.hint{font-size:11px; color:#5F7278; margin-left:auto}
+#gameOver{position:absolute; inset:0; display:none; place-content:center; text-align:center;
   background:rgba(9,14,16,.92); z-index:5; padding:20px}
-#fin.on{display:grid}
-#fin h2{font-family:var(--display); font-size:60px; font-weight:800; letter-spacing:.06em; margin:0 0 6px; text-transform:uppercase; line-height:.9}
-#fin.perdu h2{color:var(--sang)} #fin.gagne h2{color:var(--herbe)}
-#fin p{margin:0 0 18px; color:#8FA2A8; max-width:34ch}
+#gameOver.on{display:grid}
+#gameOver h2{font-family:var(--display); font-size:60px; font-weight:800; letter-spacing:.06em; margin:0 0 6px; text-transform:uppercase; line-height:.9}
+#gameOver.lost h2{color:var(--blood)} #gameOver.won h2{color:var(--herb)}
+#gameOver p{margin:0 0 18px; color:#8FA2A8; max-width:34ch}
 @media (max-width:880px){
   main{grid-template-columns:1fr; grid-template-rows:minmax(260px,1fr) auto auto; overflow:auto}
   aside{flex-direction:row; flex-wrap:wrap; border:0!important; border-top:1px solid #2A3B42!important}
   aside>*{flex:1; min-width:150px}
   #scene{order:-1; min-height:280px}
-  .deck{max-width:110px} #journal{max-height:110px}
+  .deck{max-width:110px} #log{max-height:110px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -104,56 +104,55 @@ button:focus-visible{outline:2px solid var(--urgence); outline-offset:2px}
 <body>
 <header>
   <h1>RPD <span>//</span> Rez-de-chaussée</h1>
-  <div class="meta">Tour <b id="mTour">1</b> · Seed <b id="mSeed">—</b></div>
+  <div class="meta">Tour <b id="turnNo">1</b> · Seed <b id="seedNo">—</b></div>
 </header>
 <main>
-  <aside class="gauche">
-    <div class="fiche">
+  <aside class="left">
+    <div class="sheet">
       <h2>Leon</h2>
       <div class="role">Agent — 1<sup>er</sup> jour</div>
-      <div class="jauge" id="pv"></div>
-      <div class="ligne"><span>Arme</span><b id="arme">Pistolet</b></div>
-      <div class="ligne"><span>Dés / portée</span><b id="des">2 / 5</b></div>
-      <div class="ligne"><span>Munitions</span><b id="mun">4</b></div>
-      <div class="ligne"><span>Position</span><b id="lieu">Hall</b></div>
+      <div class="gauge" id="hp"></div>
+      <div class="row"><span>Arme</span><b id="weapon">Pistolet</b></div>
+      <div class="row"><span>Dés / portée</span><b id="dice">2 / 5</b></div>
+      <div class="row"><span>Munitions</span><b id="ammo">4</b></div>
+      <div class="row"><span>Position</span><b id="location">Hall</b></div>
     </div>
-    <div><p class="titre">Sac — 6 places</p><div class="sac" id="sac"></div></div>
+    <div><p class="title">Sac — 6 places</p><div class="bag" id="bag"></div></div>
   </aside>
   <div id="scene">
-    <canvas id="plan"></canvas>
-    <div id="fin"><div><h2 id="finT"></h2><p id="finP"></p>
-      <button onclick="nouvellePartie()">Nouvelle partie</button></div></div>
+    <canvas id="board"></canvas>
+    <div id="gameOver"><div><h2 id="gameOverTitle"></h2><p id="gameOverText"></p>
+      <button onclick="newGame()">Nouvelle partie</button></div></div>
   </div>
-  <aside class="droite">
+  <aside class="right">
     <div>
-      <p class="titre">Tension</p>
-      <div class="deck"><div class="carte" id="carte">
-        <div class="face avant">
+      <p class="title">Tension</p>
+      <div class="deck"><div class="card" id="card">
+        <div class="face front">
           <div class="tag">Pioche de tension</div>
-          <h3 id="cTitre">Le calme</h3>
-          <p id="cTexte">Vous entrez. La porte se referme seule.</p>
-          <div class="num" id="cNum"></div>
+          <h3 id="cardTitle">Le calme</h3>
+          <p id="cardText">Vous entrez. La porte se referme seule.</p>
+          <div class="num" id="cardNum"></div>
         </div>
-        <div class="face dos"><span>Tension</span></div>
+        <div class="face back"><span>Tension</span></div>
       </div></div>
-      <div class="restant" id="restant">reste <b>14</b> cartes</div>
+      <div class="remaining" id="remaining">reste <b>14</b> cartes</div>
     </div>
     <div style="display:flex;flex-direction:column;flex:1;min-height:0">
-      <p class="titre">Journal</p><div id="journal"></div>
+      <p class="title">Journal</p><div id="log"></div>
     </div>
   </aside>
 </main>
 <footer>
-  <div class="pa">PA <span id="pa" style="display:flex;gap:5px"></span></div>
-  <button id="bFouiller">Fouiller</button>
-  <button id="bSoin">Herbe</button>
-  <button id="bComb">Combiner</button>
-  <button id="bArme">Changer d'arme</button>
-  <button id="bFin" class="rouge">Finir le tour</button>
-  <span class="astuce">Cliquez une case à portée pour vous y rendre · un ennemi cerclé pour tirer</span>
+  <div class="ap">PA <span id="ap" style="display:flex;gap:5px"></span></div>
+  <button id="btnSearch">Fouiller</button>
+  <button id="btnHeal">Herbe</button>
+  <button id="btnCombine">Combiner</button>
+  <button id="btnWeapon">Changer d'arme</button>
+  <button id="btnEndTurn" class="red">Finir le tour</button>
+  <span class="hint">Cliquez une case à portée pour vous y rendre · un ennemi cerclé pour tirer</span>
 </footer>
 
 <script type="module" src="./src/main.js"></script>
 </body>
 </html>
-

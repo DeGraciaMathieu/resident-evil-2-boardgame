@@ -1,4 +1,4 @@
-/* Générateur pseudo-aléatoire seedé. Seul le point d'entrée décide du seed. */
+/* Seeded pseudo-random generator. Only the entry point decides the seed. */
 export function makeRng(seed){ return { s: seed >>> 0 }; }
 export function rnd(rng){
   rng.s = (rng.s + 0x6d2b79f5) >>> 0;

@@ -1,46 +1,46 @@
-/* Légalité : le jeu d'actions possibles depuis l'état courant. */
-import { ARMES, PORTEE_DEPLACEMENT, COUT_DEPLACEMENT, COUT_DEPLACEMENT_ENGAGE } from '../config.js';
-import { memeCase, distCases, passe } from './plateau.js';
-import { distances } from './deplacement.js';
-import { vue } from './vue.js';
-import { aObjet, nbMunitions } from './sac.js';
+/* Legality: the set of possible actions from the current state. */
+import { WEAPONS, MOVE_RANGE, MOVE_COST, DISENGAGE_MOVE_COST } from '../config.js';
+import { sameCell, cellDistance, canPass } from './board.js';
+import { distances } from './movement.js';
+import { lineOfSight } from './sight.js';
+import { hasItem, ammoCount } from './bag.js';
 
 export function actions(s){
-  if (s.fin || s.phase!=='joueur') return [];
+  if (s.over || s.phase!=='player') return [];
   const out=[];
-  const ici = s.joueur.c;
+  const here = s.player.c;
 
-  // Se dégager : quitter le contact d'un ennemi coûte une action de plus.
-  const engage = s.ennemis.some(e => distCases(e.c, ici)===1 && passe(s, e.c, ici, true));
-  const coutDep = engage ? COUT_DEPLACEMENT_ENGAGE : COUT_DEPLACEMENT;
-  if (s.pa >= coutDep){
-    const d = distances(s, ici, false, PORTEE_DEPLACEMENT);
+  // Disengaging: leaving an enemy's contact costs one extra action.
+  const engaged = s.enemies.some(e => cellDistance(e.c, here)===1 && canPass(s, e.c, here, true));
+  const moveCost = engaged ? DISENGAGE_MOVE_COST : MOVE_COST;
+  if (s.ap >= moveCost){
+    const d = distances(s, here, false, MOVE_RANGE);
     for (const [k,dist] of d){
       if (dist===0) continue;
       const c = k.split(',').map(Number);
-      if (s.ennemis.some(e=>memeCase(e.c,c))) continue; // case occupée
-      out.push({ type:'deplacer', vers:c, dist, cout:coutDep, degage:engage });
+      if (s.enemies.some(e=>sameCell(e.c,c))) continue; // occupied cell
+      out.push({ type:'move', to:c, dist, cost:moveCost, disengage:engaged });
     }
   }
 
-  const arme = ARMES[s.joueur.arme];
-  if (s.pa >= 1 && (arme.mun===0 || nbMunitions(s)>=arme.mun)){
-    for (const e of s.ennemis){
-      if (distCases(ici, e.c) > arme.portee) continue;
-      if (!vue(s, ici, e.c)) continue;
-      out.push({ type:'attaquer', cible:e.id, cout:1 });
+  const weapon = WEAPONS[s.player.weapon];
+  if (s.ap >= 1 && (weapon.ammo===0 || ammoCount(s)>=weapon.ammo)){
+    for (const e of s.enemies){
+      if (cellDistance(here, e.c) > weapon.range) continue;
+      if (!lineOfSight(s, here, e.c)) continue;
+      out.push({ type:'attack', target:e.id, cost:1 });
     }
   }
 
-  const jeton = s.jetons.find(j => memeCase(j.c, ici) && !j.pris);
-  if (jeton && s.pa>=1) out.push({ type:'fouiller', cout:1 });
+  const token = s.tokens.find(t => sameCell(t.c, here) && !t.taken);
+  if (token && s.ap>=1) out.push({ type:'search', cost:1 });
 
-  if (s.pa>=1 && aObjet(s,'herbe_v') && s.joueur.pv<s.joueur.pvMax) out.push({ type:'soigner', cout:1 });
-  if (s.pa>=1 && aObjet(s,'herbe_v') && aObjet(s,'herbe_r')) out.push({ type:'combiner', cout:1 });
+  if (s.ap>=1 && hasItem(s,'green_herb') && s.player.hp<s.player.maxHp) out.push({ type:'heal', cost:1 });
+  if (s.ap>=1 && hasItem(s,'green_herb') && hasItem(s,'red_herb')) out.push({ type:'combine', cost:1 });
 
-  for (const a of ['couteau','pistolet','pompe'])
-    if (s.joueur.arme!==a && (a!=='pompe' || aObjet(s,'pompe'))) out.push({ type:'arme', arme:a, cout:0 });
+  for (const w of ['knife','pistol','shotgun'])
+    if (s.player.weapon!==w && (w!=='shotgun' || hasItem(s,'shotgun'))) out.push({ type:'weapon', weapon:w, cost:0 });
 
-  out.push({ type:'finir', cout:0 });
+  out.push({ type:'end', cost:0 });
   return out;
 }
