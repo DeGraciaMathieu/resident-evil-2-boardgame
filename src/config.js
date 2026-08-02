@@ -52,17 +52,26 @@ export const ITEMS = {
   keycard:   { name:'Carte magnétique', stack:1, key:true },
   shotgun:   { name:'Fusil à pompe', stack:1 },
 };
+// A weapon rolls its dice and applies `effects[face]` once per rolled face:
+// damage stacks, push is applied at most once per attack.
 export const WEAPONS = {
-  knife:  { name:'Couteau',       dice:1, range:1, ammo:0, area:false },
-  pistol: { name:'Pistolet',      dice:2, range:5, ammo:1, area:false },
-  shotgun:{ name:'Fusil à pompe', dice:3, range:2, ammo:1, area:true  },
+  knife:  { name:'Couteau',       dice:{blue:0,red:1}, range:1, ammo:0, area:false,
+            effects:{ 1:{kind:'damage',amount:1}, 2:{kind:'damage',amount:2} } },
+  pistol: { name:'Pistolet',      dice:{blue:1,red:0}, range:5, ammo:1, area:false,
+            effects:{ 1:{kind:'push'}, 2:{kind:'damage',amount:1} } },
+  shotgun:{ name:'Fusil à pompe', dice:{blue:1,red:1}, range:2, ammo:1, area:true,
+            effects:{ 1:{kind:'damage',amount:1}, 2:{kind:'damage',amount:2} } },
 };
 export const ENEMIES = {
   zombie:{ name:'Zombie', hp:4, damage:2, speed:2 },
   dog:   { name:'Chien',  hp:3, damage:2, speed:4 },
   licker:{ name:'Licker', hp:6, damage:3, speed:3 },
 };
-export const DIE = [0,0,1,1,2,3];
+// Die faces are hits: blue is reliable, red is swingy.
+export const DICE = {
+  blue: [0,1,1,1,1,2],
+  red:  [0,0,1,1,2,2],
+};
 export const MOVE_RANGE = 2; // cells covered by one move action
 
 export const TENSION = [

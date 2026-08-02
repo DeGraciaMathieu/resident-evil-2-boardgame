@@ -1,6 +1,6 @@
 /* Applying a legal action to the state. */
-import { ITEMS, WEAPONS, DIE, AMMO_PER_TOKEN, GREEN_HERB_HEAL } from '../config.js';
-import { rndInt } from './rng.js';
+import { ITEMS, WEAPONS, AMMO_PER_TOKEN, GREEN_HERB_HEAL } from '../config.js';
+import { resolveAttack } from './combat.js';
 import { DOOR_INDEX, doorKey, tileAt, tile, sameCell, cellDistance } from './board.js';
 import { firstStep } from './movement.js';
 import { lineOfSight } from './sight.js';
@@ -28,11 +28,12 @@ export function play(s, action){
         : [s.enemies.find(e=>e.id===action.target)].filter(Boolean);
       s.lastRolls = []; // what the player must see rolled, one entry per target
       for (const target of targets){
-        const dice = Array.from({length:weapon.dice}, ()=>DIE[rndInt(s.rng,DIE.length)]);
-        const total = dice.reduce((a,b)=>a+b,0);
-        s.lastRolls.push({ dice, total, c:[...target.c] });
-        target.hp -= total;
-        say(s, `${weapon.name} → ${target.name} · dés [${dice.join(' ')}] = ${total}`, total?'good':'bad');
+        const at = [...target.c]; // dice show where the target was shot, not where it lands
+        const r = resolveAttack(s, weapon, target);
+        s.lastRolls.push({ dice:r.dice, c:at });
+        const faces = r.dice.map(d=>(d.color==='blue'?'B':'R')+d.face).join(' ');
+        const outcome = [r.damage?`−${r.damage} PV`:'', r.pushed?'repoussé':''].filter(Boolean).join(', ');
+        say(s, `${weapon.name} → ${target.name} · dés [${faces}] ${outcome||'aucun effet'}`, outcome?'good':'bad');
         if (target.hp<=0){ s.enemies=s.enemies.filter(e=>e.id!==target.id); say(s,`${target.name} s'effondre.`,'good'); }
       }
       break;
