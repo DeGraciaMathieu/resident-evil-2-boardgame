@@ -162,7 +162,7 @@ button:focus-visible{outline:2px solid var(--urgence); outline-offset:2px}
    POINTS D'APPARITION imprimés sur les tuiles.
    ========================================================================= */
 import {
-  TUILES, PORTES, APPARITIONS, JETONS, ITEMS, ARMES, ENNEMIS, DE,
+  TUILES, PORTES, APPARITIONS, JETONS, ITEMS, ARMES, DE,
   TENSION,
   NOM_JOUEUR, PV_MAX, PA_MAX, CASE_DEPART, ARME_DEPART, SAC_MAX, SAC_DEPART,
   POOL_JETONS_A, MUNITIONS_PAR_JETON, DECK_COUPE,
@@ -172,11 +172,13 @@ import {
   SECOUSSE_INITIALE, SECOUSSE_AMORTISSEMENT, SECOUSSE_SEUIL,
 } from './src/config.js';
 import { makeRng, rndInt, shuffle } from './src/rules/rng.js';
-import { CASES, PORTE_INDEX, BORNES, cle, tuileDe, tuile, memeCase, distCases, passe } from './src/rules/plateau.js';
+import { CASES, PORTE_INDEX, BORNES, cle, tuileDe, tuile, memeCase, distCases } from './src/rules/plateau.js';
 import { distances, premierPas } from './src/rules/deplacement.js';
 import { vue } from './src/rules/vue.js';
 import { ajouter, retirer, nbMunitions } from './src/rules/sac.js';
 import { actions } from './src/rules/actions.js';
+import { dit } from './src/rules/journal.js';
+import { activer, spawn } from './src/rules/ennemis.js';
 
 /* ------------------------------------------------------------- PARTIE */
 function creerPartie(seed){
@@ -207,8 +209,6 @@ function creerPartie(seed){
     log:[{t:'sys', m:'Hall principal. La sortie parking est condamnée par un lecteur de badge.'}],
   };
 }
-
-const dit=(s,m,t='info')=>s.log.push({t,m});
 
 function jouer(s, action){
   if (s.fin) return s;
@@ -265,42 +265,6 @@ function jouer(s, action){
 }
 
 /* -------------------------------------------- ennemis & tension */
-function activer(s, bonus=0){
-  for (const e of s.ennemis){
-    if (s.fin) return;
-    let pas = e.vitesse + bonus;
-    while (pas > 0){
-      if (distCases(e.c, s.joueur.c)===1 && passe(s,e.c,s.joueur.c,true)){
-        s.joueur.pv -= e.degats;
-        dit(s, `${e.nom} vous frappe. −${e.degats} PV.`, 'mal');
-        break;
-      }
-      const chemin = premierPas(s, e.c, s.joueur.c, true);
-      if (!chemin || !chemin.length) break;
-      const suivant = chemin[0];
-      if (memeCase(suivant, s.joueur.c) || s.ennemis.some(o=>o!==e && memeCase(o.c,suivant))) break;
-      e.c = suivant; pas--;
-    }
-    if (s.joueur.pv<=0){ s.fin='defaite'; dit(s,'Vous ne vous relevez pas.','mal'); return; }
-  }
-}
-
-function pointApparition(s, distMin){
-  const d = distances(s, s.joueur.c, true);
-  const libres = APPARITIONS.filter(p => !s.ennemis.some(e=>memeCase(e.c,p)));
-  const notes = libres.map(p => ({ p, d: d.has(cle(p)) ? d.get(cle(p)) : 999 }))
-                      .filter(o => o.d < 999)
-                      .sort((a,b)=>a.d-b.d);
-  if (!notes.length) return null;
-  return (notes.find(o=>o.d>=distMin) || notes[notes.length-1]).p;
-}
-function spawn(s, type, distMin){
-  const p = pointApparition(s, distMin);
-  if (!p) return;
-  const d = ENNEMIS[type];
-  s.ennemis.push({ id:s.prochainId++, type, nom:d.nom, pv:d.pv, degats:d.degats, vitesse:d.vitesse, c:p });
-}
-
 function tirerTension(s){
   if (!s.deck.length){ s.fin='defaite'; dit(s,'Le bâtiment est submergé. Plus aucune issue.','mal'); return; }
   const c = s.deck.shift(); s.defausse.push(c); s.derniereCarte=c;
