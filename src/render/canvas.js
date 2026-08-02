@@ -212,12 +212,14 @@ export function draw(app){
     ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.font=`700 ${Math.max(9,Math.round(side*.62))}px "Courier Prime", monospace`;
     for (let i=0;i<f.dice.length;i++){
-      const v = rolling ? (Math.floor(now/55)+i*2)%4 : f.dice[i];
+      const die = f.dice[i];
+      const v = rolling ? (Math.floor(now/55)+i*2)%3 : die.face;
       ctx.save(); ctx.translate(x,y);
       if (rolling) ctx.rotate(Math.sin(now/45 + i*2)*.5);
-      ctx.fillStyle='#F0E4C8'; ctx.fillRect(-side/2,-side/2,side,side);
+      ctx.fillStyle = die.color==='blue' ? '#2E4A66' : '#7E1C1C';
+      ctx.fillRect(-side/2,-side/2,side,side);
       ctx.strokeStyle='#16232A'; ctx.lineWidth=1.5; ctx.strokeRect(-side/2,-side/2,side,side);
-      ctx.fillStyle = !rolling && v===0 ? '#7E1C1C' : '#16232A';
+      ctx.fillStyle = !rolling && v===0 ? 'rgba(240,228,200,.45)' : '#F0E4C8';
       ctx.fillText(v, 0, 1);
       ctx.restore();
       x += side+gap;

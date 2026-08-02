@@ -27,7 +27,8 @@ export function refresh(app, cardDrawn=false){
   el('phase').textContent=PHASE_LABELS[S.phase];
   el('phase').classList.toggle('busy', S.phase!=='player');
   el('weapon').textContent=weapon.name;
-  el('dice').textContent=weapon.dice+' / '+weapon.range+(weapon.area?' zone':'');
+  const profile=[weapon.dice.blue&&`${weapon.dice.blue}B`, weapon.dice.red&&`${weapon.dice.red}R`].filter(Boolean).join('+');
+  el('dice').textContent=profile+' / '+weapon.range+(weapon.area?' zone':'');
   el('ammo').textContent=ammoCount(S);
   el('location').textContent=tile(tileAt(p.c)).name;
 
