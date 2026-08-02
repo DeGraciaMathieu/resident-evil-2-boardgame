@@ -29,18 +29,56 @@ Test runner: `node:test`
 ## Layout
 
 | Module | Responsibility | Came from |
-| --- | --- | --- |
+| --- | --- | --- | 
 | `src/config.js` | tables de données (tuiles, portes, jetons, items, armes, ennemis, deck tension) et valeurs des règles | lignes 180–251 + valeurs magiques dispersées |
-| `src/rules/…` | | |
-| `src/state/…` | | |
-| `src/render/…` | | |
-| `src/input/…` | | |
-| `src/loop/…` | | |
+| `src/rules/rng.js` | générateur seedé (makeRng, rnd, rndInt, shuffle) | lignes 165–178 |
+| `src/rules/plateau.js` | index des cases/portes, franchissabilité, distances de Chebyshev | lignes 253–288, 342 |
+| `src/rules/deplacement.js` | BFS d'accessibilité (`distances`) et de chemin (`premierPas`) | lignes 289–316 |
+| `src/rules/vue.js` | ligne de vue (Bresenham décomposé) | lignes 318–341 |
+| `src/rules/sac.js` | inventaire : piles, capacité, munitions | lignes 375–389 |
+| `src/rules/actions.js` | légalité : jeu d'actions possibles | lignes 392–431 |
+| `src/rules/jouer.js` | application d'une action légale | lignes 433–485 |
+| `src/rules/ennemis.js` | activation (poursuite, frappe) et apparition | lignes 487–522 |
+| `src/rules/tension.js` | pioche et résolution des cartes tension | lignes 524–537 |
+| `src/rules/tour.js` | enchaînement ennemis → tension → joueur | lignes 539–543 |
+| `src/rules/journal.js` | `dit` : messages du journal | ligne 390 |
+| `src/state/partie.js` | fabrique de l'état d'une partie (`creerPartie`) | lignes 344–373 |
+| `src/render/canvas.js` | rendu du plateau (canvas 2D), secousse cosmétique | lignes 548–705 |
+| `src/render/hud.js` | HUD DOM : fiche, sac, journal, carte tension, fin | lignes 754–811 |
+| `src/input/souris.js` | survol et clic plateau → intentions | lignes 707–744 |
+| `src/input/boutons.js` | boutons du bandeau → intentions | lignes 813–822 |
+| `src/loop/controleur.js` | `acte` : intention → règle → rendu | lignes 746–752 |
+| `src/main.js` | point d'entrée : objet `app`, seed, câblage | lignes 824–836 |
+
+Écarts par rapport au tableau des couches du skill `rules-extraction`, actés au GATE 2 :
+
+- `src/rules/journal.js` a été ajouté (non prévu au plan initial) : `dit` est utilisé par
+  les règles, qui n'ont pas le droit d'importer `state/`.
+- `src/state/partie.js` importe `rules/rng.js` et `rules/plateau.js` : la fabrique a
+  besoin du RNG seedé et de `tuileDe` pour la mise en place. La flèche `state → rules`
+  n'est pas prévue par le tableau, mais l'alternative (dupliquer ou déplacer la mise en
+  place) aurait changé la structure du code d'origine.
+- Les variables globales du prototype (`S`, `G`, `survol`, `accessibles`, `cibles`,
+  `secousse`, `cv`, `ctx`) sont devenues un objet `app` créé par `main.js` et passé en
+  paramètre aux fonctions de `render/`, `input/` et `loop/`. Les modules `input/`
+  reçoivent leurs effets (`acte`, `maj`, `dessiner`) par injection depuis `main.js` pour
+  ne pas importer `render/` ni `loop/`.
 
 ## Rules extracted
 
 | Rule | Module | Test | Notes |
 | --- | --- | --- | --- |
+| RNG seedé | `src/rules/rng.js` | `tests/rng.test.js` | inchangé du prototype |
+| Franchissabilité | `src/rules/plateau.js` | `tests/plateau.test.js` | portes, verrous, cas ennemi |
+| Accessibilité et chemin | `src/rules/deplacement.js` | `tests/deplacement.test.js` | franchir une porte = un pas normal |
+| Ligne de vue | `src/rules/vue.js` | `tests/vue.test.js` | variable morte `prec` conservée |
+| Inventaire | `src/rules/sac.js` | `tests/sac.test.js` | piles et capacité |
+| Légalité des actions | `src/rules/actions.js` | `tests/actions.test.js` | surcoût de dégagement |
+| Application d'une action | `src/rules/jouer.js` | `tests/jouer.test.js` | dés seedés reproductibles |
+| Ennemis | `src/rules/ennemis.js` | `tests/ennemis.test.js` | frappe au contact, apparition distMin |
+| Tension | `src/rules/tension.js` | `tests/tension.test.js` | défaite sur deck vide |
+| Fin de tour | `src/rules/tour.js` | `tests/tour.test.js` | interruption sur défaite |
+| Mise en place | `src/state/partie.js` | `tests/partie.test.js` | invariants du scénario |
 
 ## Randomness and time
 
