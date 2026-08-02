@@ -99,6 +99,7 @@ export const SWARM_BONUS = 2;
 // Minimum spawn distance per tension card.
 export const SPAWN_DIST = { approach:6, growl:1, pack:4, licker:3 };
 export const MOVE_COST = 1;
+export const DOOR_COST = 1; // opening or closing an adjacent door
 export const DISENGAGE_MOVE_COST = 2; // leaving an enemy's contact costs one extra action
 export const SIGHT_GUARD = 200; // anti-infinite-loop guard of the line-of-sight trace
 export const BFS_MAX = 99; // default BFS depth (safety bound)

@@ -5,7 +5,7 @@ import { drawTension } from '../src/rules/tension.js';
 const base = () => ({
   over: null, log: [],
   player: { hp: 8, maxHp: 10, c: [3,4] },
-  bag: [], bagMax: 6, enemies: [], nextId: 1, openedDoors: [],
+  bag: [], bagMax: 6, enemies: [], nextId: 1, openDoors: [],
   deck: [], discard: [], lastCard: undefined,
 });
 

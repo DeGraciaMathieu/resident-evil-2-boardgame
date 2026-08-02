@@ -22,17 +22,19 @@ export const tileAt = (c) => CELLS.get(key(c));
 export const tile = (id) => TILES.find(t=>t.id===id);
 export const sameCell = (a,b) => a[0]===b[0] && a[1]===b[1];
 export const cellDistance = (a,b) => Math.max(Math.abs(a[0]-b[0]), Math.abs(a[1]-b[1]));
+export const doorKey = (d) => key(d.a)+'|'+key(d.b);
+export const doorAt = (c) => DOORS.find(d => sameCell(d.a,c) || sameCell(d.b,c));
 
-// Passage between two orthogonally adjacent cells.
-export function canPass(s, a, b, forEnemy=false){
+// Passage between two orthogonally adjacent cells: free within a tile,
+// between tiles it requires the door to be open — for everyone, keys grant
+// no passage by themselves (they only allow the open action).
+export function canPass(s, a, b){
   const ta = CELLS.get(key(a)), tb = CELLS.get(key(b));
   if (!ta || !tb) return false;
   if (ta === tb) return true;                       // same tile: free
   const d = DOOR_INDEX.get(`${a}|${b}`);
   if (!d) return false;                             // wall: no door
-  if (!d.lock) return true;
-  if (s.openedDoors.includes(key(d.a)+'|'+key(d.b))) return true;
-  return forEnemy ? false : s.bag.some(i=>i.id===d.lock);
+  return s.openDoors.includes(doorKey(d));
 }
 export function neighbors(c){
   return [[c[0]+1,c[1]],[c[0]-1,c[1]],[c[0],c[1]+1],[c[0],c[1]-1]];

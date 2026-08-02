@@ -9,7 +9,7 @@ const base = () => ({
   rng: makeRng(1), lastTile: 'hall',
   player: { hp: 10, maxHp: 10, c: [3,4], weapon: 'pistol' },
   bag: [{id:'ammo',n:4}], bagMax: 6,
-  enemies: [], nextId: 1, tokens: [], openedDoors: [],
+  enemies: [], nextId: 1, tokens: [], openDoors: [], unlockedDoors: [],
   deck: [{ id:'calm', title:'Silence', text:'Rien.' }], discard: [],
 });
 
@@ -20,18 +20,28 @@ test('moving follows the path and debits the AP cost', () => {
   assert.equal(s.ap, 3);
 });
 
-test('crossing a locked door with the key unlocks it durably', () => {
+test('opening a locked door with the key unlocks it durably and opens it', () => {
   const s = base();
   s.bag.push({id:'spade_key',n:1});
   s.player.c = [10,3];
-  play(s, { type:'move', to:[10,4], cost:1 });
-  assert.ok(s.openedDoors.includes('10,3|10,4'));
+  play(s, { type:'door', a:[10,3], b:[10,4], opens:true, cost:1 });
+  assert.ok(s.openDoors.includes('10,3|10,4'));
+  assert.ok(s.unlockedDoors.includes('10,3|10,4'));
+  assert.equal(s.ap, 3);
+});
+
+test('closing an open door removes it from the open set', () => {
+  const s = base();
+  s.player.c = [4,4];
+  s.openDoors = ['4,4|4,5'];
+  play(s, { type:'door', a:[4,4], b:[4,5], opens:false, cost:1 });
+  assert.deepEqual(s.openDoors, []);
 });
 
 test('reaching the parking exit wins the game', () => {
   const s = base();
   s.player.c = [13,8];
-  s.openedDoors = ['13,8|13,9'];
+  s.openDoors = ['13,8|13,9'];
   play(s, { type:'move', to:[13,9], cost:1 });
   assert.equal(s.over, 'victory');
 });

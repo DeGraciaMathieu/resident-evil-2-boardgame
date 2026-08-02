@@ -11,13 +11,13 @@ export function* activateSteps(s, bonus=0){
     if (s.over) return;
     let steps = e.speed + bonus;
     while (steps > 0){
-      if (cellDistance(e.c, s.player.c)===1 && canPass(s,e.c,s.player.c,true)){
+      if (cellDistance(e.c, s.player.c)===1 && canPass(s,e.c,s.player.c)){
         s.player.hp -= e.damage;
         say(s, `${e.name} vous frappe. −${e.damage} PV.`, 'bad');
         yield { kind:'strike', id:e.id, dmg:e.damage };
         break;
       }
-      const path = firstStep(s, e.c, s.player.c, true);
+      const path = firstStep(s, e.c, s.player.c);
       if (!path || !path.length) break;
       const next = path[0];
       if (sameCell(next, s.player.c) || s.enemies.some(o=>o!==e && sameCell(o.c,next))) break;
@@ -32,7 +32,7 @@ export function* activateSteps(s, bonus=0){
 export function activate(s, bonus=0){ for (const _ of activateSteps(s, bonus)); }
 
 export function spawnPoint(s, minDist){
-  const d = distances(s, s.player.c, true);
+  const d = distances(s, s.player.c);
   const free = SPAWN_POINTS.filter(p => !s.enemies.some(e=>sameCell(e.c,p)));
   const scored = free.map(p => ({ p, d: d.has(key(p)) ? d.get(key(p)) : INFINITE_DIST }))
                      .filter(o => o.d < INFINITE_DIST)

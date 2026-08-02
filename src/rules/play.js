@@ -1,7 +1,7 @@
 /* Applying a legal action to the state. */
 import { ITEMS, WEAPONS, DIE, AMMO_PER_TOKEN, GREEN_HERB_HEAL } from '../config.js';
 import { rndInt } from './rng.js';
-import { DOOR_INDEX, key, tileAt, tile, sameCell, cellDistance } from './board.js';
+import { DOOR_INDEX, doorKey, tileAt, tile, sameCell, cellDistance } from './board.js';
 import { firstStep } from './movement.js';
 import { lineOfSight } from './sight.js';
 import { addItem, removeItem } from './bag.js';
@@ -13,15 +13,8 @@ export function play(s, action){
 
   switch(action.type){
     case 'move': {
-      const path = firstStep(s, s.player.c, action.to, false) || [];
-      for (const step of path){
-        const d = DOOR_INDEX.get(`${s.player.c}|${step}`);
-        if (d && d.lock && !s.openedDoors.includes(key(d.a)+'|'+key(d.b))){
-          s.openedDoors.push(key(d.a)+'|'+key(d.b));
-          say(s, `La ${ITEMS[d.lock].name.toLowerCase()} tourne dans la serrure.`, 'good');
-        }
-        s.player.c = step;
-      }
+      const path = firstStep(s, s.player.c, action.to) || [];
+      for (const step of path) s.player.c = step;
       const t = tileAt(s.player.c);
       if (t !== s.lastTile){ say(s, `→ ${tile(t).name}`); s.lastTile = t; }
       if (t === 'parking'){ s.over='victory'; say(s,'Vous poussez la porte. Air froid, sirènes au loin.','good'); }
@@ -49,6 +42,21 @@ export function play(s, action){
       if (t.content==='nothing') say(s,'Des tiroirs vides.','bad');
       else if (!addItem(s, t.content, t.content==='ammo'?AMMO_PER_TOKEN:1)) say(s,`${ITEMS[t.content].name} — sac plein, laissé sur place.`,'bad');
       else say(s,`Trouvé : ${ITEMS[t.content].name}.`,'good');
+      break;
+    }
+    case 'door': {
+      const d = DOOR_INDEX.get(`${action.a}|${action.b}`);
+      const dk = doorKey(d);
+      const i = s.openDoors.indexOf(dk);
+      if (i >= 0){ s.openDoors.splice(i,1); say(s,'Vous refermez la porte.'); }
+      else {
+        if (d.lock && !s.unlockedDoors.includes(dk)){
+          s.unlockedDoors.push(dk);
+          say(s, `La ${ITEMS[d.lock].name.toLowerCase()} tourne dans la serrure.`, 'good');
+        }
+        s.openDoors.push(dk);
+        say(s,'Vous ouvrez la porte.');
+      }
       break;
     }
     case 'heal': removeItem(s,'green_herb'); s.player.hp=Math.min(s.player.maxHp,s.player.hp+GREEN_HERB_HEAL); say(s,'Herbe verte. +3 PV.','good'); break;

@@ -5,7 +5,7 @@ import { endTurn, endTurnSteps } from '../src/rules/turn.js';
 const base = () => ({
   over: null, log: [], turn: 1, ap: 0, maxAp: 4, phase: 'player',
   player: { hp: 10, maxHp: 10, c: [3,4] },
-  bag: [], bagMax: 6, enemies: [], nextId: 1, openedDoors: [],
+  bag: [], bagMax: 6, enemies: [], nextId: 1, openDoors: [],
   deck: [{ id:'calm', title:'Silence', text:'Rien.' }], discard: [],
 });
 
