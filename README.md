@@ -1,55 +1,55 @@
-# RPD — Rez-de-chaussée
+# RPD — Ground floor
 
-Jeu de plateau solo inspiré de Resident Evil 2 : Leon doit traverser le
-rez-de-chaussée du commissariat et atteindre la sortie parking avant que la
-pioche de tension ne s'épuise.
+Solo turn-based board game inspired by Resident Evil 2: Leon must cross the
+police station's ground floor and reach the parking exit before the tension
+deck runs out. The game's interface and texts are in French.
 
-> ⚠️ **Ouvrir `index.html` par double-clic ne fonctionne plus.** Le code est
-> découpé en modules ESM natifs, que les navigateurs refusent de charger en
-> `file://`. Il faut servir le dossier par HTTP :
+> ⚠️ **Opening `index.html` by double-click no longer works.** The code is
+> split into native ESM modules, which browsers refuse to load over
+> `file://`. The folder must be served over HTTP:
 >
 > ```sh
 > npm run dev
 > ```
 
-## Lancer le jeu
+## Run the game
 
 ```sh
-npm run dev        # sert le dossier (npx serve), puis ouvrir l'URL affichée
+npm run dev        # serves the folder (npx serve), then open the printed URL
 ```
 
-Une partie précise peut être rejouée avec `?seed=N` dans l'URL.
+A specific game can be replayed with `?seed=N` in the URL.
 
-## Tester
+## Test
 
 ```sh
-npm test           # node --test (Node ≥ 22, aucune dépendance)
+npm test           # node --test (Node ≥ 22, zero dependencies)
 npm run test:watch
 ```
 
 ## Architecture
 
 ```
-index.html            coquille HTML/CSS, charge src/main.js
+index.html            HTML/CSS shell, loads src/main.js
 src/
-  config.js           tables de données et valeurs des règles
-  rules/              règles pures (déterministes via le RNG seedé de l'état)
-    rng.js            générateur seedé
-    plateau.js        cases, portes, franchissabilité
-    deplacement.js    BFS d'accessibilité et de chemin
-    vue.js            ligne de vue
-    sac.js            inventaire
-    actions.js        légalité des actions
-    jouer.js          application d'une action
-    ennemis.js        activation et apparition
-    tension.js        pioche de tension
-    tour.js           enchaînement des phases
-    journal.js        messages du journal
-  state/partie.js     fabrique de l'état d'une partie
-  render/             canvas (plateau) et HUD (DOM)
-  input/              souris et boutons → intentions
-  loop/controleur.js  intention → règle → rendu
-  main.js             point d'entrée : app, seed, câblage
-tests/                tests macro (node:test), un fichier par règle
-docs/decisions.md     décisions du refactoring, comportements conservés, questions ouvertes
+  config.js           data tables and rule values
+  rules/              pure rules (deterministic via the state's seeded RNG)
+    rng.js            seeded generator
+    board.js          cells, doors, passability
+    movement.js       reachability and path BFS
+    sight.js          line of sight
+    bag.js            inventory
+    actions.js        action legality
+    play.js           applying an action
+    enemies.js        activation and spawning
+    tension.js        tension deck
+    turn.js           phase sequencing
+    log.js            game log messages
+  state/game.js       factory of a game's state
+  render/             canvas (board) and HUD (DOM)
+  input/              mouse and buttons → intents
+  loop/controller.js  intent → rule → render
+  main.js             entry point: app, seed, wiring
+tests/                macro tests (node:test), one file per rule
+docs/decisions.md     refactoring decisions, preserved behaviours, open questions
 ```

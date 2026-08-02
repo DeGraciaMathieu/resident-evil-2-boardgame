@@ -1,57 +1,57 @@
 ---
 name: architecture
-description: Use when il faut situer un changement dans le code — quel module porte quelle responsabilité, qui importe qui, et où va le code neuf selon le type de modification.
+description: Use when a change must be located in the code — which module carries which responsibility, who imports whom, and where new code goes depending on the type of modification.
 auto_invoke: true
 ---
 
 # Architecture
 
-## Carte des modules
+## Module map
 
-| Module | Rôle | Dépendances clés |
+| Module | Role | Key dependencies |
 | --- | --- | --- |
-| `index.html` | Coquille HTML/CSS (layout, styles, ids du HUD), charge `src/main.js` | — |
-| `src/config.js` | Tables de données (tuiles, portes, jetons, items, armes, ennemis, deck tension) et toutes les valeurs des règles | rien |
-| `src/rules/rng.js` | Générateur seedé : `makeRng`, `rnd`, `rndInt`, `shuffle` | rien |
-| `src/rules/plateau.js` | Index `CASES`/`PORTE_INDEX`/`BORNES`, `cle`, `tuileDe`, `tuile`, `memeCase`, `distCases`, `passe`, `adjacentes` | config |
-| `src/rules/deplacement.js` | BFS : `distances` (accessibilité), `premierPas` (chemin) | config, plateau |
-| `src/rules/vue.js` | `vue` : ligne de vue (Bresenham décomposé) | config, plateau |
-| `src/rules/sac.js` | `aObjet`, `ajouter`, `retirer`, `nbMunitions` | config |
-| `src/rules/actions.js` | `actions(s)` : le jeu d'actions légales | config, plateau, deplacement, vue, sac |
-| `src/rules/jouer.js` | `jouer(s, action)` : applique une action légale | config, rng, plateau, deplacement, vue, sac, journal, tour |
-| `src/rules/ennemis.js` | `activer`, `pointApparition`, `spawn` | config, plateau, deplacement, journal |
-| `src/rules/tension.js` | `tirerTension(s)` : pioche et résout une carte | config, sac, ennemis, journal |
-| `src/rules/tour.js` | `finDeTour(s)` : ennemis → tension → joueur | ennemis, tension |
-| `src/rules/journal.js` | `dit(s, m, t)` : pousse un message dans `s.log` | rien |
-| `src/state/partie.js` | `creerPartie(seed)` : fabrique l'état complet `S` | config, rng, plateau |
-| `src/render/canvas.js` | `taille`, `geometrie`, `recalculer`, `dessiner` — plateau canvas, secousse | config, plateau, actions |
-| `src/render/hud.js` | `maj(app, carteTiree)` — fiche, jauges, sac, journal, carte tension, fin | config, plateau, sac, actions, canvas |
-| `src/input/souris.js` | `brancherSouris(app, {acte, maj, dessiner})` — survol, clic plateau | config, rules (lecture) |
-| `src/input/boutons.js` | `brancherBoutons(app, {acte})` — boutons du bandeau | rules (lecture) |
-| `src/loop/controleur.js` | `acte(app, a)` : intention → `jouer` → `maj` | rules/jouer, render/hud |
-| `src/main.js` | Objet `app`, seed (URL ou aléatoire), câblage, `nouvellePartie` | tout |
+| `index.html` | HTML/CSS shell (layout, styles, HUD ids), loads `src/main.js` | — |
+| `src/config.js` | Data tables (tiles, doors, tokens, items, weapons, enemies, tension deck) and every rule value | nothing |
+| `src/rules/rng.js` | Seeded generator: `makeRng`, `rnd`, `rndInt`, `shuffle` | nothing |
+| `src/rules/board.js` | `CELLS`/`DOOR_INDEX`/`BOUNDS` indexes, `key`, `tileAt`, `tile`, `sameCell`, `cellDistance`, `canPass`, `neighbors` | config |
+| `src/rules/movement.js` | BFS: `distances` (reachability), `firstStep` (path) | config, board |
+| `src/rules/sight.js` | `lineOfSight`: line of sight (decomposed Bresenham) | config, board |
+| `src/rules/bag.js` | `hasItem`, `addItem`, `removeItem`, `ammoCount` | config |
+| `src/rules/actions.js` | `actions(s)`: the set of legal actions | config, board, movement, sight, bag |
+| `src/rules/play.js` | `play(s, action)`: applies a legal action | config, rng, board, movement, sight, bag, log, turn |
+| `src/rules/enemies.js` | `activate`, `spawnPoint`, `spawn` | config, board, movement, log |
+| `src/rules/tension.js` | `drawTension(s)`: draws and resolves a card | config, bag, enemies, log |
+| `src/rules/turn.js` | `endTurn(s)`: enemies → tension → player | enemies, tension |
+| `src/rules/log.js` | `say(s, m, t)`: pushes a message into `s.log` | nothing |
+| `src/state/game.js` | `createGame(seed)`: builds the whole state `S` | config, rng, board |
+| `src/render/canvas.js` | `resize`, `geometry`, `recompute`, `draw` — canvas board, shake | config, board, actions |
+| `src/render/hud.js` | `refresh(app, cardDrawn)` — sheet, gauges, bag, log, tension card, game over | config, board, bag, actions, canvas |
+| `src/input/mouse.js` | `bindMouse(app, {act, refresh, draw})` — board hover and click | config, rules (read) |
+| `src/input/buttons.js` | `bindButtons(app, {act})` — footer buttons | rules (read) |
+| `src/loop/controller.js` | `act(app, a)`: intent → `play` → `refresh` | rules/play, render/hud |
+| `src/main.js` | `app` object, seed (URL or random), wiring, `newGame` | everything |
 
-Les flèches d'import descendent toujours ce tableau. `input/` ne touche jamais `render/`
-ni `loop/` directement : `main.js` lui injecte `acte`, `maj` et `dessiner`.
+Import arrows always point down this table. `input/` never touches `render/` nor
+`loop/` directly: `main.js` injects `act`, `refresh` and `draw` into it.
 
-## Les deux objets d'état
+## The two state objects
 
-- `S` (état de jeu, `creerPartie`) : `seed`, `rng`, `tour`, `pa`/`paMax`, `joueur`,
-  `sac`/`sacMax`, `ennemis`, `prochainId`, `jetons`, `portesOuvertes`, `deck`/`defausse`/
-  `derniereCarte`, `derniereTuile`, `phase` (`joueur`|`ennemis`|`tension`), `fin`
-  (`null`|`victoire`|`defaite`), `log`.
-- `app` (état applicatif, `main.js`) : `cv`, `ctx`, `S`, `G` (géométrie), `survol`,
-  `accessibles`, `cibles`, `secousse`.
+- `S` (game state, `createGame`): `seed`, `rng`, `turn`, `ap`/`maxAp`, `player`,
+  `bag`/`bagMax`, `enemies`, `nextId`, `tokens`, `openedDoors`, `deck`/`discard`/
+  `lastCard`, `lastTile`, `phase` (`player`|`enemies`|`tension`), `over`
+  (`null`|`victory`|`defeat`), `log`.
+- `app` (application state, `main.js`): `cv`, `ctx`, `S`, `G` (geometry), `hover`,
+  `reachable`, `targets`, `shake`.
 
-## Où va le code neuf, par type de changement
+## Where new code goes, by type of change
 
-| Changement | Fichiers à toucher, dans l'ordre |
+| Change | Files to touch, in order |
 | --- | --- |
-| Nouvelle valeur d'équilibrage (coût, portée, seuil…) | `src/config.js` (export nommé), puis la règle qui la consomme |
-| Nouvelle règle ou modification d'une règle | `src/rules/<module>.js` + son test macro dans `tests/<module>.test.js` |
-| Nouveau type d'action du joueur | `src/rules/actions.js` (légalité) → `src/rules/jouer.js` (résolution) → déclencheur dans `src/input/` → affichage dans `src/render/hud.js` si besoin |
-| Nouvelle carte tension, arme, ennemi, item | voir le skill `regles-du-jeu` |
-| Modification de la carte (tuiles, portes, jetons) | voir le skill `plateau` |
-| Nouvel élément d'interface ou d'affichage | voir le skill `rendu-interface` |
-| Nouveau champ d'état de jeu | `creerPartie` (`src/state/partie.js`), puis les règles concernées |
-| Nouveau test | `tests/<module>.test.js`, voir le skill `testing` |
+| New balancing value (cost, range, threshold…) | `src/config.js` (named export), then the rule consuming it |
+| New rule or rule modification | `src/rules/<module>.js` + its macro test in `tests/<module>.test.js` |
+| New player action type | `src/rules/actions.js` (legality) → `src/rules/play.js` (resolution) → trigger in `src/input/` → display in `src/render/hud.js` if needed |
+| New tension card, weapon, enemy, item | see the `game-rules` skill |
+| Map change (tiles, doors, tokens) | see the `board` skill |
+| New UI or display element | see the `render-ui` skill |
+| New game-state field | `createGame` (`src/state/game.js`), then the affected rules |
+| New test | `tests/<module>.test.js`, see the `testing` skill |

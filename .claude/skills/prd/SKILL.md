@@ -1,55 +1,56 @@
 ---
 name: prd
-description: Use when l'utilisateur veut une spécification (PRD) d'une évolution du jeu avant toute implémentation — explore le code pour la base technique, ne pose que les décisions produit, n'implémente rien.
+description: Use when the user wants a specification (PRD) of a game evolution before any implementation — explores the code for the technical baseline, asks only the product decisions, implements nothing.
 user_invocable: true
 ---
 
-# Workflow : rédiger un PRD
+# Workflow: writing a PRD
 
-Ce workflow produit un document de spécification. **Il n'implémente rien** : aucun
-fichier de `src/` ni de `tests/` n'est modifié.
+This workflow produces a specification document. **It implements nothing**: no file in
+`src/` nor `tests/` is modified.
 
-## Démarche
+## Approach
 
-1. Explorer le code existant (skills `architecture`, `regles-du-jeu`, `plateau`,
-   `rendu-interface`) pour remplir seul toute la partie technique : fichiers concernés,
-   fonctions à étendre, constantes existantes dans `src/config.js`, tests impactés.
-2. Ne poser à l'utilisateur que les **décisions produit** que le code ne règle pas :
-   valeurs d'équilibrage, comportement attendu dans les cas limites, priorités.
-3. Écrire le PRD au format fixe ci-dessous, en français, dans le vocabulaire du jeu.
+1. Explore the existing code (`architecture`, `game-rules`, `board`, `render-ui`
+   skills) to fill the whole technical part alone: affected files, functions to
+   extend, existing constants in `src/config.js`, impacted tests.
+2. Ask the user only the **product decisions** the code does not settle: balancing
+   values, expected behaviour in edge cases, priorities.
+3. Write the PRD in the fixed format below, in the game's vocabulary. Any quoted
+   player-facing text is written in French (the game is French).
 
-## Format fixe
+## Fixed format
 
 ```markdown
-# PRD — <titre>
+# PRD — <title>
 
-## Objectif
-<le problème ou l'envie, en une ou deux phrases joueur>
+## Goal
+<the problem or wish, in one or two player-side sentences>
 
-## Base technique
-<état actuel du code concerné : modules, fonctions, constantes, avec chemins réels>
+## Technical baseline
+<current state of the affected code: modules, functions, constants, with real paths>
 
-## Comportement
-<le comportement cible, cas nominal puis cas limites, valeurs chiffrées explicites>
+## Behaviour
+<the target behaviour, nominal case then edge cases, explicit numeric values>
 
-## Hors périmètre
-<ce que cette évolution ne fait volontairement pas>
+## Out of scope
+<what this evolution deliberately does not do>
 
-## Impact par couche
-| Couche | Impact |
+## Impact per layer
+| Layer | Impact |
 | --- | --- |
-| `src/config.js` | <constantes à ajouter/modifier> |
-| `src/rules/` | <règles touchées> |
-| `src/state/` | <champs d'état nouveaux> |
-| `src/render/` + `index.html` | <affichages> |
-| `src/input/` + `src/loop/` | <déclencheurs> |
+| `src/config.js` | <constants to add/modify> |
+| `src/rules/` | <affected rules> |
+| `src/state/` | <new state fields> |
+| `src/render/` + `index.html` | <displays> |
+| `src/input/` + `src/loop/` | <triggers> |
 
-## Critères d'acceptation
-<liste vérifiable, du point de vue du joueur>
+## Acceptance criteria
+<verifiable list, from the player's point of view>
 
 ## Tests
-<les tests macro à écrire : fichier cible + comportement affirmé>
+<the macro tests to write: target file + asserted behaviour>
 
-## Risques et questions ouvertes
-<y compris les interactions avec docs/decisions.md le cas échéant>
+## Risks and open questions
+<including interactions with docs/decisions.md where relevant>
 ```

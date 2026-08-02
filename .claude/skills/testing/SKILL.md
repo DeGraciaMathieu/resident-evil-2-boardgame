@@ -1,54 +1,53 @@
 ---
 name: testing
-description: Use when il faut écrire, adapter ou lancer des tests — pour savoir quel fichier couvre quoi, comment construire un état de test et quelle philosophie suivre.
+description: Use when tests must be written, adapted or run — to know which file covers what, how to build a test state and which philosophy to follow.
 auto_invoke: true
 ---
 
 # Tests
 
-## Commande
+## Command
 
-- `npm test` — `node --test` (Node ≥ 22), zéro dépendance. Découvre `tests/*.test.js`.
-- `npm run test:watch` — en continu.
-- Imports : `node:test` et `node:assert/strict`.
+- `npm test` — `node --test` (Node ≥ 22), zero dependencies. Discovers `tests/*.test.js`.
+- `npm run test:watch` — continuously.
+- Imports: `node:test` and `node:assert/strict`.
 
-## Philosophie
+## Philosophy
 
-Des **tests macro** : chaque test affirme un comportement qu'un joueur constate, dans le
-vocabulaire du jeu (« se dégager du contact d'un ennemi coûte deux actions »), jamais un
-détail d'implémentation (« le tableau interne a 3 éléments »). Un ou deux tests par
-règle : le cas nominal et le cas limite qui justifie la règle. La couverture en
-pourcentage n'est pas un objectif.
+**Macro tests**: each test asserts a behaviour a player observes, in the game's
+vocabulary ("disengaging from an enemy in contact costs two actions"), never an
+implementation detail ("the internal array has 3 elements"). One or two tests per
+rule: the nominal case and the edge case that justifies the rule. Coverage percentage
+is not a target.
 
-L'état de test se construit en **littéral explicite**, petit et local (voir les
-fabriques `base()` en tête de `tests/actions.test.js`, `tests/jouer.test.js`…), jamais
-via un helper partagé qui cache la mise en place. Le déterminisme vient de
-`makeRng(seed)` : même seed, mêmes dés.
+Test state is built as a **small, local, explicit literal** (see the `base()`
+factories at the top of `tests/actions.test.js`, `tests/play.test.js`…), never via a
+shared helper hiding the setup. Determinism comes from `makeRng(seed)`: same seed,
+same dice.
 
-## Fichier → portée couverte
+## File → covered scope
 
-| Fichier | Couvre | Exemples d'assertions |
+| File | Covers | Example assertions |
 | --- | --- | --- |
-| `tests/rng.test.js` | `src/rules/rng.js` | même seed → même séquence ; shuffle = permutation sans mutation |
-| `tests/plateau.test.js` | `src/rules/plateau.js` | circulation intra-tuile ; mur sans porte ; verrous (joueur/ennemi) |
-| `tests/deplacement.test.js` | `src/rules/deplacement.js` | portée de déplacement ; porte = pas normal ; absence de route |
-| `tests/vue.test.js` | `src/rules/vue.js` | vue le long d'un couloir ; coupée par mur ou porte fermée |
-| `tests/sac.test.js` | `src/rules/sac.js` | empilement ; refus sur sac plein ; libération du slot |
-| `tests/actions.test.js` | `src/rules/actions.js` | rien hors phase joueur ; surcoût de dégagement ; conditions d'attaque |
-| `tests/jouer.test.js` | `src/rules/jouer.js` | coût en PA ; déverrouillage durable ; victoire parking ; dés seedés |
-| `tests/ennemis.test.js` | `src/rules/ennemis.js` | frappe au contact ; poursuite ; défaite à 0 PV ; distMin d'apparition |
-| `tests/tension.test.js` | `src/rules/tension.js` | défaite sur deck vide ; effets des cartes ; pioche → défausse |
-| `tests/tour.test.js` | `src/rules/tour.js` | enchaînement des phases ; interruption sur défaite |
-| `tests/partie.test.js` | `src/state/partie.js` | déterminisme par seed ; invariants de mise en place |
+| `tests/rng.test.js` | `src/rules/rng.js` | same seed → same sequence; shuffle = permutation without mutation |
+| `tests/board.test.js` | `src/rules/board.js` | intra-tile movement; wall without a door; locks (player/enemy) |
+| `tests/movement.test.js` | `src/rules/movement.js` | move range; door = normal step; absence of route |
+| `tests/sight.test.js` | `src/rules/sight.js` | sight along a corridor; cut by a wall or a closed door |
+| `tests/bag.test.js` | `src/rules/bag.js` | stacking; refusal on full bag; slot freed |
+| `tests/actions.test.js` | `src/rules/actions.js` | nothing outside the player phase; disengage surcharge; attack conditions |
+| `tests/play.test.js` | `src/rules/play.js` | AP cost; durable unlocking; parking victory; seeded dice |
+| `tests/enemies.test.js` | `src/rules/enemies.js` | contact strike; chase; defeat at 0 hp; spawn minDist |
+| `tests/tension.test.js` | `src/rules/tension.js` | defeat on empty deck; card effects; draw → discard |
+| `tests/turn.test.js` | `src/rules/turn.js` | phase sequencing; interruption on defeat |
+| `tests/game.test.js` | `src/state/game.js` | seed determinism; setup invariants |
 
-Aucun test n'importe `render/`, `input/`, `loop/` ni `main.js` : ces couches se
-vérifient en jouant (`npm run dev`).
+No test imports `render/`, `input/`, `loop/` nor `main.js`: those layers are verified
+by playing (`npm run dev`).
 
-## Où mettre un nouveau test
+## Where to put a new test
 
-1. Règle existante modifiée → compléter le `tests/<module>.test.js` correspondant.
-2. Nouveau module de règles `src/rules/x.js` → créer `tests/x.test.js` (même nom).
-3. Le test cite des cases réelles du plateau (Hall `[3,4]`, porte `[10,3]→[10,4]`…) :
-   s'appuyer sur `src/config.js` pour choisir des coordonnées vraies, et sur les tests
-   existants comme modèles.
-4. Toujours finir par `npm test` complet — jamais un seul fichier — avant de conclure.
+1. Modified existing rule → extend the matching `tests/<module>.test.js`.
+2. New rules module `src/rules/x.js` → create `tests/x.test.js` (same name).
+3. Tests quote real board cells (hall `[3,4]`, door `[10,3]→[10,4]`…): rely on
+   `src/config.js` to pick true coordinates, and on the existing tests as models.
+4. Always finish with a full `npm test` — never a single file — before concluding.

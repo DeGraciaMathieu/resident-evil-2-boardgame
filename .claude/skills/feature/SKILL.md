@@ -1,50 +1,50 @@
 ---
 name: feature
-description: Use when l'utilisateur demande d'implémenter une fonctionnalité ou une modification du jeu — déroule le workflow complet, de la reformulation au résumé final, dans le respect des couches.
+description: Use when the user asks to implement a feature or a game modification — runs the full workflow, from restating the request to the final summary, within the layer rules.
 user_invocable: true
 ---
 
-# Workflow : implémenter une demande
+# Workflow: implementing a request
 
-## 1. Comprendre
+## 1. Understand
 
-- Reformuler la demande en une ou deux phrases, dans le vocabulaire du jeu.
-- Invoquer le skill `architecture` (et `regles-du-jeu` / `plateau` / `rendu-interface`
-  selon le sujet) pour situer les fichiers concernés.
-- Poser les questions de clarification **avant** de coder :
-  - les valeurs chiffrées (coût en PA, portée, dégâts, distance d'apparition…) ;
-  - les interactions avec l'existant (cumul avec le surcoût de dégagement ? effet sur
-    le deck de tension ? visible dans le HUD ?) ;
-  - les cas limites (sac plein, PA insuffisants, partie finie, case occupée).
-- Si la demande touche un comportement listé dans `docs/decisions.md` (« Deliberately
-  left alone » ou « Open questions »), le signaler et faire trancher.
+- Restate the request in one or two sentences, in the game's vocabulary.
+- Invoke the `architecture` skill (and `game-rules` / `board` / `render-ui` depending
+  on the topic) to locate the affected files.
+- Ask the clarifying questions **before** coding:
+  - numeric values (AP cost, range, damage, spawn distance…);
+  - interactions with the existing game (does it stack with the disengage surcharge?
+    effect on the tension deck? visible in the HUD?);
+  - edge cases (full bag, not enough AP, game over, occupied cell).
+- If the request touches a behaviour listed in `docs/decisions.md` ("Deliberately left
+  alone" or "Open questions"), flag it and have it settled.
 
-## 2. Implémenter
+## 2. Implement
 
-- Respecter `CLAUDE.md` : valeurs dans `src/config.js`, règles pures dans `src/rules/`
-  (aléatoire via `s.rng`), rendu dans `src/render/`, déclencheurs dans `src/input/`
-  passant par `acte`.
-- Suivre l'ordre des procédures du skill de domaine concerné (ex. « ajouter une carte
-  tension » : config → tension.js → test → jeu).
-- Ne pas ajouter de dépendance, ni de fonctionnalité non demandée.
+- Follow `CLAUDE.md`: values in `src/config.js`, pure rules in `src/rules/`
+  (randomness via `s.rng`), rendering in `src/render/`, triggers in `src/input/`
+  going through `act`. Player-facing text in French.
+- Follow the order of the relevant domain skill's procedures (e.g. "adding a tension
+  card": config → tension.js → test → game).
+- Add no dependency, nor any unrequested feature.
 
-## 3. Tester
+## 3. Test
 
-- Écrire le ou les tests macro dans le `tests/<module>.test.js` correspondant
-  (comportement joueur, état en littéral, seed fixé).
-- `npm test` complet, corriger jusqu'au vert. Deux échecs sur la même approche →
-  s'arrêter et revoir le plan avec l'utilisateur.
-- Vérifier en jeu si le rendu ou les entrées sont touchés (`npm run dev`).
+- Write the macro test(s) in the matching `tests/<module>.test.js` (player behaviour,
+  literal state, fixed seed).
+- Full `npm test`, fix until green. Two failures of the same approach → stop and
+  revisit the plan with the user.
+- Check in game if rendering or inputs are touched (`npm run dev`).
 
-## 4. Mettre à jour la documentation
+## 4. Update the documentation
 
-Seulement si le périmètre a bougé :
-- `CLAUDE.md` si une convention change ;
-- le skill de domaine concerné si une table concept → implémentation n'est plus exacte ;
-- le `README.md` si l'arborescence ou les commandes changent ;
-- `docs/decisions.md` si une question ouverte a été tranchée.
+Only if the scope moved:
+- `CLAUDE.md` if a convention changes;
+- the affected domain skill if a concept → implementation table is no longer exact;
+- `README.md` if the tree or the commands change;
+- `docs/decisions.md` if an open question was settled.
 
-## 5. Résumer
+## 5. Summarise
 
-Terminer par : fichiers modifiés, tests ajoutés (nom + comportement couvert), résultat
-de `npm test`, et ce qui reste ouvert le cas échéant.
+End with: files changed, tests added (name + covered behaviour), `npm test` result,
+and what remains open if anything.

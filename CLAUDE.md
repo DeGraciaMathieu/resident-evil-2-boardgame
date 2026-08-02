@@ -1,58 +1,57 @@
-# RPD — Rez-de-chaussée
+# RPD — Ground floor
 
-Jeu de plateau solo au tour par tour inspiré de Resident Evil 2 : Leon traverse le
-rez-de-chaussée du commissariat et doit atteindre la sortie parking avant l'épuisement
-de la pioche de tension.
+Solo turn-based board game inspired by Resident Evil 2: Leon crosses the police
+station's ground floor and must reach the parking exit before the tension deck runs out.
 
-## Stack et commandes
+## Stack and commands
 
-- JavaScript vanilla, modules ESM natifs, **zéro dépendance** (ni runtime ni dev).
-- Rendu : Canvas 2D (plateau) + DOM (HUD). Node ≥ 22 pour les tests.
-- `npm run dev` — sert le dossier par HTTP (obligatoire : les modules ESM ne se chargent
-  pas en `file://`, le double-clic sur `index.html` ne fonctionne pas).
-- `npm test` — suite `node --test` (tests dans `tests/*.test.js`).
-- `npm run test:watch` — la même en continu.
-- Pas de lint ni de formateur : c'est un choix, ne pas en ajouter sans demande explicite.
-- Une partie se rejoue à l'identique avec `?seed=N` dans l'URL.
+- Vanilla JavaScript, native ESM modules, **zero dependencies** (neither runtime nor dev).
+- Rendering: 2D canvas (board) + DOM (HUD). Node ≥ 22 for the tests.
+- `npm run dev` — serves the folder over HTTP (mandatory: ESM modules do not load over
+  `file://`, double-clicking `index.html` does not work).
+- `npm test` — `node --test` suite (tests in `tests/*.test.js`).
+- `npm run test:watch` — same, continuously.
+- No linter nor formatter: that is a choice, do not add one without an explicit request.
+- A game replays identically with `?seed=N` in the URL.
 
-## Conventions non négociables
+## Non-negotiable conventions
 
-- **Aucun accès à `document`, `window`, `canvas` dans `src/rules/`** — ni en lecture ni
-  en écriture. Une règle prend l'état `s`, décide, et c'est tout.
-- **Aucun `Math.random()`, `Date.now()`, `performance.now()` dans `src/rules/`.**
-  L'aléatoire des règles passe exclusivement par `s.rng` (générateur seedé de
-  `src/rules/rng.js`). Seules exceptions, documentées dans `docs/decisions.md` : la
-  secousse cosmétique dans `src/render/canvas.js` et le tirage du seed dans `src/main.js`.
-- **Aucune valeur magique hors de `src/config.js`** : toute valeur de règle (coût,
-  portée, dégât, distance, seuil, délai) est un export nommé de `config.js`.
-- **Les imports descendent, jamais l'inverse** :
+- **No access to `document`, `window`, `canvas` in `src/rules/`** — neither read nor
+  write. A rule takes the state `s`, decides, and that is all.
+- **No `Math.random()`, `Date.now()`, `performance.now()` in `src/rules/`.**
+  Rule randomness goes exclusively through `s.rng` (seeded generator from
+  `src/rules/rng.js`). Only exceptions, documented in `docs/decisions.md`: the cosmetic
+  shake in `src/render/canvas.js` and the seed draw in `src/main.js`.
+- **No magic value outside `src/config.js`**: every rule value (cost, range, damage,
+  distance, threshold, delay) is a named export of `config.js`.
+- **Imports point downward, never the other way**:
   `config` ← `rules` ← `state`/`render` ← (`input`, `loop`) ← `main`.
-  En particulier : `rules/` n'importe que `config.js` et d'autres modules de `rules/` ;
-  `input/` n'importe ni `render/` ni `loop/` — ses effets (`acte`, `maj`, `dessiner`)
-  lui sont injectés par `main.js`.
-- **L'état du jeu vit dans `S`** (fabriqué par `creerPartie`, `src/state/partie.js`) et
-  l'état applicatif (canvas, géométrie, survol, cibles) dans l'objet `app` créé par
-  `src/main.js`. Ne pas créer de nouvelle variable globale : étendre `S` ou `app`.
-- Les règles **mutent `s` en place** (choix documenté) : suivre ce style, ne pas
-  introduire d'immutabilité partielle.
-- Langue du code, des tests et des docs : **français**.
+  In particular: `rules/` imports only `config.js` and other `rules/` modules;
+  `input/` imports neither `render/` nor `loop/` — its effects (`act`, `refresh`,
+  `draw`) are injected by `main.js`.
+- **The game state lives in `S`** (built by `createGame`, `src/state/game.js`) and the
+  application state (canvas, geometry, hover, targets) in the `app` object created by
+  `src/main.js`. Do not create new globals: extend `S` or `app`.
+- The rules **mutate `s` in place** (documented choice): follow that style, do not
+  introduce partial immutability.
+- Language: code, tests and docs in **English**; player-facing text (cards, log
+  messages, UI labels) in **French** — the game is French.
 
-## Comportement attendu
+## Expected behaviour
 
-- Ne jamais déclarer une tâche terminée sans avoir lancé `npm test` et vu la suite verte.
-- Si une approche échoue deux fois, s'arrêter et revoir le plan au lieu d'une troisième
-  variante.
-- Tester au niveau macro : le comportement qu'un joueur constate, dans le vocabulaire du
-  jeu — pas les détails d'implémentation (voir le skill `testing`).
-- `docs/decisions.md` fait foi pour les comportements volontairement conservés et les
-  questions ouvertes : ne pas « corriger » ce qui y est listé sans décision explicite.
+- Never declare a task finished without running `npm test` and seeing the suite green.
+- If an approach fails twice, stop and revisit the plan instead of a third variant.
+- Test at the macro level: the behaviour a player observes, in the game's vocabulary —
+  not implementation details (see the `testing` skill).
+- `docs/decisions.md` is authoritative for deliberately preserved behaviours and open
+  questions: do not "fix" anything listed there without an explicit decision.
 
-## Skills disponibles
+## Available skills
 
-- `architecture` — carte des modules et « où va le code neuf » par type de changement.
-- `regles-du-jeu` — règles pures : légalité, résolution, ennemis, tension, tour, seed.
-- `plateau` — topologie : tuiles, portes, verrous, BFS, ligne de vue.
-- `rendu-interface` — contrat `app`, rendu canvas/HUD, entrées par injection.
-- `testing` — commande, philosophie macro, carte des tests, où écrire un nouveau test.
-- `feature` — workflow d'implémentation d'une demande, de la reformulation au résumé.
-- `prd` — rédige une spécification (PRD) sans rien implémenter.
+- `architecture` — module map and "where new code goes" by type of change.
+- `game-rules` — pure rules: legality, resolution, enemies, tension, turn, seed.
+- `board` — topology: tiles, doors, locks, BFS, line of sight.
+- `render-ui` — the `app` contract, canvas/HUD rendering, injected inputs.
+- `testing` — command, macro philosophy, test map, where to write a new test.
+- `feature` — implementation workflow, from restating the request to the summary.
+- `prd` — writes a specification (PRD) without implementing anything.

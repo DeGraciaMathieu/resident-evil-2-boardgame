@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Hook Stop : bloque la fin de tâche tant que la suite de tests échoue.
-# Gère la ré-entrance (stop_hook_active) pour éviter une boucle infinie.
+# Stop hook: blocks task completion while the test suite fails.
+# Handles re-entrancy (stop_hook_active) to avoid an infinite loop.
 input=$(cat)
 if printf '%s' "$input" | grep -Eq '"stop_hook_active" *: *true'; then
   exit 0
@@ -8,10 +8,10 @@ fi
 cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
 log=$(mktemp)
 if ! npm test >"$log" 2>&1; then
-  echo "npm test échoue — corriger les tests avant de terminer la tâche :" >&2
+  echo "npm test is failing — fix the tests before finishing the task:" >&2
   tail -20 "$log" >&2
   rm -f "$log"
-  exit 2   # code 2 : bloque le Stop et renvoie stderr au modèle
+  exit 2   # exit code 2: blocks the Stop and sends stderr back to the model
 fi
 rm -f "$log"
 exit 0

@@ -7,14 +7,14 @@
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/scripts/run-tests.sh\"",
             "timeout": 120,
-            "statusMessage": "Lancement des tests…"
+            "statusMessage": "Running tests…"
           },
           {
             "type": "agent",
-            "prompt": "Tu es le vérificateur de cohérence documentaire de ce projet. La documentation vivante est README.md — en particulier sa section « Architecture » (arbre commenté de src/ et tests/) et ses commandes (npm run dev, npm test, avertissement file://). Tout est écrit à la main : rien n'est généré dynamiquement. Les textes du jeu (cartes tension, messages du journal) dans src/config.js et src/rules/ sont du contenu, pas de la documentation : ignore-les. Exécute : git diff HEAD -- src tests package.json index.html README.md. Si rien de pertinent n'a changé, ou si README.md décrit encore fidèlement le code (modules existants, rôles, commandes), réponds exactement : accept. Sinon réponds : block, puis liste chaque passage périmé — cite-le, donne son emplacement, et indique la correction que le code impose désormais. Ne réécris pas la documentation toi-même et ne signale aucun problème de style.",
+            "prompt": "You are the documentation consistency checker for this project. The living documentation is README.md — in particular its \"Architecture\" section (commented tree of src/ and tests/) and its commands (npm run dev, npm test, the file:// warning). Everything there is hand-written: nothing is generated dynamically. The game's texts (tension cards, log messages) in src/config.js and src/rules/ are content, not documentation: ignore them entirely. Run: git diff HEAD -- src tests package.json index.html README.md. If nothing relevant changed, or if README.md still describes the code faithfully (existing modules, roles, commands), reply exactly: accept. Otherwise reply: block, then list each stale passage — quote it, give its location, and state the correction the code now requires. Do not rewrite the documentation yourself and do not report style issues.",
             "model": "claude-sonnet-4-6",
             "timeout": 120,
-            "statusMessage": "Vérification de la synchro documentaire…"
+            "statusMessage": "Checking documentation sync…"
           }
         ]
       }
