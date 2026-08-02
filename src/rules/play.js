@@ -6,7 +6,6 @@ import { firstStep } from './movement.js';
 import { lineOfSight } from './sight.js';
 import { addItem, removeItem } from './bag.js';
 import { say } from './log.js';
-import { endTurn } from './turn.js';
 
 export function play(s, action){
   if (s.over) return s;
@@ -57,7 +56,6 @@ export function play(s, action){
     case 'weapon': s.player.weapon=action.weapon; say(s,`Arme en main : ${WEAPONS[action.weapon].name}.`); break;
     case 'end': s.ap=0; break;
   }
-
-  if (s.ap<=0 && !s.over) endTurn(s);
+  // The caller checks turnOver(s) and drives endTurn / endTurnSteps itself.
   return s;
 }

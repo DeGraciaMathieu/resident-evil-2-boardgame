@@ -30,6 +30,7 @@ test('« Ils arrivent » spawns a zombie', () => {
   drawTension(s);
   assert.equal(s.enemies.length, 1);
   assert.equal(s.enemies[0].type, 'zombie');
+  assert.ok(s.log.some(l=>l.m.includes('surgit')), 'the spawn is announced in the log');
 });
 
 test('« Reprendre souffle » heals one hp without exceeding the maximum', () => {

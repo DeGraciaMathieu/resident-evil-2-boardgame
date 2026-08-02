@@ -1,10 +1,12 @@
-/* Enemies: activation (chase and strike) and spawning. */
+/* Enemies: activation (chase and strike) and spawning.
+   activateSteps yields after each visible change (one cell moved, one strike)
+   so the caller can replay the activation step by step; activate drains it. */
 import { SPAWN_POINTS, ENEMIES, INFINITE_DIST } from '../config.js';
-import { key, sameCell, cellDistance, canPass } from './board.js';
+import { key, sameCell, cellDistance, canPass, tileAt, tile } from './board.js';
 import { distances, firstStep } from './movement.js';
 import { say } from './log.js';
 
-export function activate(s, bonus=0){
+export function* activateSteps(s, bonus=0){
   for (const e of s.enemies){
     if (s.over) return;
     let steps = e.speed + bonus;
@@ -12,6 +14,7 @@ export function activate(s, bonus=0){
       if (cellDistance(e.c, s.player.c)===1 && canPass(s,e.c,s.player.c,true)){
         s.player.hp -= e.damage;
         say(s, `${e.name} vous frappe. −${e.damage} PV.`, 'bad');
+        yield { kind:'strike', id:e.id };
         break;
       }
       const path = firstStep(s, e.c, s.player.c, true);
@@ -19,10 +22,13 @@ export function activate(s, bonus=0){
       const next = path[0];
       if (sameCell(next, s.player.c) || s.enemies.some(o=>o!==e && sameCell(o.c,next))) break;
       e.c = next; steps--;
+      yield { kind:'move', id:e.id };
     }
     if (s.player.hp<=0){ s.over='defeat'; say(s,'Vous ne vous relevez pas.','bad'); return; }
   }
 }
+
+export function activate(s, bonus=0){ for (const _ of activateSteps(s, bonus)); }
 
 export function spawnPoint(s, minDist){
   const d = distances(s, s.player.c, true);
@@ -38,4 +44,5 @@ export function spawn(s, type, minDist){
   if (!p) return;
   const d = ENEMIES[type];
   s.enemies.push({ id:s.nextId++, type, name:d.name, hp:d.hp, damage:d.damage, speed:d.speed, c:p });
+  say(s, `${d.name} surgit — ${tile(tileAt(p)).name}.`, 'bad');
 }

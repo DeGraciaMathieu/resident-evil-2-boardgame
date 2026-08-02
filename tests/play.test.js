@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { play } from '../src/rules/play.js';
+import { turnOver, endTurn } from '../src/rules/turn.js';
 import { makeRng } from '../src/rules/rng.js';
 
 const base = () => ({
@@ -55,10 +56,12 @@ test('searching picks up the token content, once only', () => {
   assert.equal(s.tokens[0].taken, true);
 });
 
-test('running out of AP triggers the end of turn', () => {
+test('running out of AP hands the turn over, then the end of turn brings it back', () => {
   const s = base();
   s.ap = 1;
   play(s, { type:'move', to:[4,4], cost:1 });
+  assert.equal(turnOver(s), true);   // the caller now drives the end of turn
+  endTurn(s);
   assert.equal(s.turn, 2);
   assert.equal(s.ap, s.maxAp);
   assert.equal(s.phase, 'player');

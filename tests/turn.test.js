@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { endTurn } from '../src/rules/turn.js';
+import { endTurn, endTurnSteps } from '../src/rules/turn.js';
 
 const base = () => ({
   over: null, log: [], turn: 1, ap: 0, maxAp: 4, phase: 'player',
@@ -18,6 +18,20 @@ test('the end of turn activates the enemies, draws a card and hands back to the 
   assert.equal(s.turn, 2);
   assert.equal(s.ap, 4);
   assert.equal(s.phase, 'player');
+});
+
+test('the end of turn replays one visible change at a time: each enemy step, then the card', () => {
+  const s = base();
+  s.enemies = [{ id:1, name:'Zombie', hp:4, damage:2, speed:2, c:[6,4] }];
+  const kinds = [], cells = [];
+  for (const step of endTurnSteps(s)){
+    kinds.push(step.kind);
+    if (step.kind==='move') cells.push([...s.enemies[0].c]);
+  }
+  assert.deepEqual(kinds, ['phase','move','move','phase','card']);
+  assert.deepEqual(cells, [[5,4],[4,4]]); // one cell per step, visible each time
+  assert.equal(s.phase, 'player');
+  assert.equal(s.turn, 2);
 });
 
 test('a defeat during the enemies phase interrupts the turn', () => {
