@@ -163,11 +163,11 @@ button:focus-visible{outline:2px solid var(--urgence); outline-offset:2px}
    ========================================================================= */
 import {
   TUILES, PORTES, APPARITIONS, JETONS, ITEMS, ARMES, ENNEMIS, DE,
-  PORTEE_DEPLACEMENT, TENSION,
+  TENSION,
   NOM_JOUEUR, PV_MAX, PA_MAX, CASE_DEPART, ARME_DEPART, SAC_MAX, SAC_DEPART,
   POOL_JETONS_A, MUNITIONS_PAR_JETON, DECK_COUPE,
   SOIN_HERBE_VERTE, SOIN_SOUFFLE, MUNITIONS_TROUVAILLE, BONUS_GROUILLE,
-  DIST_APPARITION, COUT_DEPLACEMENT, COUT_DEPLACEMENT_ENGAGE,
+  DIST_APPARITION,
   JOURNAL_MAX, DECK_CRITIQUE, DELAI_FLIP_CARTE, SEED_MAX,
   SECOUSSE_INITIALE, SECOUSSE_AMORTISSEMENT, SECOUSSE_SEUIL,
 } from './src/config.js';
@@ -175,7 +175,8 @@ import { makeRng, rndInt, shuffle } from './src/rules/rng.js';
 import { CASES, PORTE_INDEX, BORNES, cle, tuileDe, tuile, memeCase, distCases, passe } from './src/rules/plateau.js';
 import { distances, premierPas } from './src/rules/deplacement.js';
 import { vue } from './src/rules/vue.js';
-import { aObjet, ajouter, retirer, nbMunitions } from './src/rules/sac.js';
+import { ajouter, retirer, nbMunitions } from './src/rules/sac.js';
+import { actions } from './src/rules/actions.js';
 
 /* ------------------------------------------------------------- PARTIE */
 function creerPartie(seed){
@@ -208,47 +209,6 @@ function creerPartie(seed){
 }
 
 const dit=(s,m,t='info')=>s.log.push({t,m});
-
-/* ---------------------------------------------------------- ACTIONS */
-function actions(s){
-  if (s.fin || s.phase!=='joueur') return [];
-  const out=[];
-  const ici = s.joueur.c;
-
-  // Se dégager : quitter le contact d'un ennemi coûte une action de plus.
-  const engage = s.ennemis.some(e => distCases(e.c, ici)===1 && passe(s, e.c, ici, true));
-  const coutDep = engage ? COUT_DEPLACEMENT_ENGAGE : COUT_DEPLACEMENT;
-  if (s.pa >= coutDep){
-    const d = distances(s, ici, false, PORTEE_DEPLACEMENT);
-    for (const [k,dist] of d){
-      if (dist===0) continue;
-      const c = k.split(',').map(Number);
-      if (s.ennemis.some(e=>memeCase(e.c,c))) continue; // case occupée
-      out.push({ type:'deplacer', vers:c, dist, cout:coutDep, degage:engage });
-    }
-  }
-
-  const arme = ARMES[s.joueur.arme];
-  if (s.pa >= 1 && (arme.mun===0 || nbMunitions(s)>=arme.mun)){
-    for (const e of s.ennemis){
-      if (distCases(ici, e.c) > arme.portee) continue;
-      if (!vue(s, ici, e.c)) continue;
-      out.push({ type:'attaquer', cible:e.id, cout:1 });
-    }
-  }
-
-  const jeton = s.jetons.find(j => memeCase(j.c, ici) && !j.pris);
-  if (jeton && s.pa>=1) out.push({ type:'fouiller', cout:1 });
-
-  if (s.pa>=1 && aObjet(s,'herbe_v') && s.joueur.pv<s.joueur.pvMax) out.push({ type:'soigner', cout:1 });
-  if (s.pa>=1 && aObjet(s,'herbe_v') && aObjet(s,'herbe_r')) out.push({ type:'combiner', cout:1 });
-
-  for (const a of ['couteau','pistolet','pompe'])
-    if (s.joueur.arme!==a && (a!=='pompe' || aObjet(s,'pompe'))) out.push({ type:'arme', arme:a, cout:0 });
-
-  out.push({ type:'finir', cout:0 });
-  return out;
-}
 
 function jouer(s, action){
   if (s.fin) return s;
