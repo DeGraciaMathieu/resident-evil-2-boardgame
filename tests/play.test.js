@@ -46,21 +46,25 @@ test('reaching the parking exit wins the game', () => {
   assert.equal(s.over, 'victory');
 });
 
-test('attacking spends one round and deals the seeded dice', () => {
+test('attacking spends one round and resolves the seeded pistol die', () => {
   const s = base();
   s.enemies = [{ id:1, type:'zombie', name:'Zombie', hp:4, damage:2, speed:2, c:[5,4] }];
   play(s, { type:'attack', target:1, cost:1 });
   assert.equal(s.bag[0].n, 3);
-  // the roll the player sees on the board: two pistol dice over the target
+  // the roll the player sees on the board: one blue pistol die over the target
   assert.equal(s.lastRolls.length, 1);
-  assert.equal(s.lastRolls[0].dice.length, 2);
+  assert.equal(s.lastRolls[0].dice.length, 1);
+  assert.equal(s.lastRolls[0].dice[0].color, 'blue');
   assert.deepEqual(s.lastRolls[0].c, [5,4]);
-  assert.equal(s.enemies[0]?.hp ?? 0, 4 - s.lastRolls[0].total);
+  // pistol profile: a 2-hit face deals 1 damage, a 1-hit face pushes instead
+  const face = s.lastRolls[0].dice[0].face;
+  assert.equal(s.enemies[0].hp, face===2 ? 3 : 4);
+  assert.deepEqual(s.enemies[0].c, face===1 ? [6,4] : [5,4]);
   const replay = base();
   replay.enemies = [{ id:1, type:'zombie', name:'Zombie', hp:4, damage:2, speed:2, c:[5,4] }];
   play(replay, { type:'attack', target:1, cost:1 });
-  // same seed → same dice → same damage
-  assert.deepEqual(s.enemies.map(e=>e.hp), replay.enemies.map(e=>e.hp));
+  // same seed → same dice → same outcome
+  assert.deepEqual(s.enemies.map(e=>[e.hp,e.c]), replay.enemies.map(e=>[e.hp,e.c]));
 });
 
 test('searching picks up the token content, once only', () => {

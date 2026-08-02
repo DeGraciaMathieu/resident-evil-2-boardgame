@@ -140,6 +140,21 @@ adjacent to the player. Deliberate choices, revisit only on explicit request:
   doors are never chosen, so early spawns concentrate on the hall's ring. If both
   hall points are occupied, a spawn card does nothing — accepted for now.
 
+## Dice combat profiles (added 2026-08-02)
+
+Combat moved from "sum N identical dice = damage" to per-weapon profiles: each
+weapon rolls a mix of blue and red dice (faces are hits: 0, 1 or 2) and maps each
+rolled face to an effect (`WEAPONS[*].effects` in `config.js`, resolved by
+`rules/combat.js`). Deliberate choices, revisit only on explicit request:
+
+- Face distributions: blue `[0,1,1,1,1,2]` (reliable), red `[0,0,1,1,2,2]` (swingy).
+- Effects apply once **per rolled face**, except push which applies at most once per
+  attack.
+- Push moves the enemy to one orthogonal cell strictly further (Chebyshev) from the
+  player; when every such cell is blocked (wall, closed door, occupied cell) the push
+  is lost — no substitute damage.
+- Area weapons (shotgun) roll a full profile per target, as before.
+
 ## Open questions
 
 Decisions the code does not settle and that were not made. Never resolved by guessing.
