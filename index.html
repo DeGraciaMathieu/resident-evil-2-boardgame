@@ -88,8 +88,7 @@ button.red{border-color:#6A2A2A; color:#D08585}
 button.red:hover:not(:disabled){background:var(--blood); color:var(--paper); border-color:var(--blood)}
 button:focus-visible{outline:2px solid var(--warning); outline-offset:2px}
 .hint{font-size:11px; color:#5F7278; margin-left:auto}
-/* Visibility is driven by the .show class (JS-timed), never by an animation:
-   the banner must stay readable under prefers-reduced-motion. */
+/* Visibility is driven by the .show class (JS-timed), never by an animation. */
 #banner{position:absolute; inset:0; display:grid; place-content:center; pointer-events:none; z-index:4;
   opacity:0; transition:opacity .25s ease}
 #banner.show{opacity:1}
@@ -112,7 +111,6 @@ button:focus-visible{outline:2px solid var(--warning); outline-offset:2px}
   #scene{order:-1; min-height:280px}
   .deck{max-width:110px} #log{max-height:110px}
 }
-@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
 </style>
 </head>
 <body>

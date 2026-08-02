@@ -35,7 +35,7 @@ transient cosmetic effects pushed via `addFx`, timed with `performance.now`) and
 | Intent → rule → render | `act(app, action)` | `src/loop/controller.js` |
 | End-of-turn playback | `playback` (private) — replays `endTurnSteps` with `STEP_DELAYS`, one `refresh` per step, sets `app.focus`, stages FX via `stage` | `src/loop/controller.js` |
 | Playback FX (move tween, spawn pop, floating damage) | `addFx(app, fx)` + rendering in `draw`, durations in `FX_DURATION` | `src/render/canvas.js` |
-| Phase banner over the board | `banner(text, tone)` — ids `banner`/`bannerText`, tones `enemy`/`tension`/`player`; shown by class `show`, hidden on a JS timer (`BANNER_HOLD`) so it survives `prefers-reduced-motion` | `src/render/hud.js` |
+| Phase banner over the board | `banner(text, tone)` — ids `banner`/`bannerText`, tones `enemy`/`tension`/`player`; shown by class `show`, hidden on a JS timer (`BANNER_HOLD`) | `src/render/hud.js` |
 | Card pull animation | class `pull` on id `deck` (keyframes `pull`), added by `refresh` when a card is drawn | `src/render/hud.js` |
 | Phase label (header) | `PHASE_LABELS` + id `phase` (class `busy` outside the player phase) | `src/render/hud.js` |
 | HUD DOM ids | `turnNo`, `phase`, `seedNo`, `hp`, `ap`, `weapon`, `dice`, `ammo`, `location`, `bag`, `log`, `remaining`, `card`, `cardTitle`, `cardText`, `cardNum`, `gameOver`, `gameOverTitle`, `gameOverText`, buttons `btnSearch`/`btnHeal`/`btnCombine`/`btnWeapon`/`btnEndTurn` | `index.html` |
