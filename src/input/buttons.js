@@ -5,6 +5,7 @@ import { actions } from '../rules/actions.js';
 export function bindButtons(app, { act }){
   const click=(id,fn)=>document.getElementById(id).addEventListener('click',fn);
   click('btnSearch', ()=>act(app, actions(app.S).find(a=>a.type==='search')));
+  click('btnDoor',   ()=>act(app, actions(app.S).find(a=>a.type==='door')));
   click('btnHeal',   ()=>act(app, actions(app.S).find(a=>a.type==='heal')));
   click('btnCombine',()=>act(app, actions(app.S).find(a=>a.type==='combine')));
   click('btnWeapon', ()=>{

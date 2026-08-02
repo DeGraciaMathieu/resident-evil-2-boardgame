@@ -1,7 +1,7 @@
 /* Mouse on the board: hover and click (movement, shooting, help messages).
    Effects (act, refresh, draw) are injected by main.js. */
 import { ITEMS, WEAPONS, SHAKE_INITIAL } from '../config.js';
-import { CELLS, DOOR_INDEX, key, sameCell, cellDistance } from '../rules/board.js';
+import { CELLS, DOOR_INDEX, key, doorKey, sameCell, cellDistance } from '../rules/board.js';
 import { distances } from '../rules/movement.js';
 import { ammoCount } from '../rules/bag.js';
 import { actions } from '../rules/actions.js';
@@ -38,11 +38,13 @@ export function bindMouse(app, { act, refresh, draw }){
     }
     const a = app.reachable.get(key(c));
     if (a) return act(app, a);
-    const d = distances(S, S.player.c, false, 1);
+    const d = distances(S, S.player.c, 1);
     for (const v of [[c[0]+1,c[1]],[c[0]-1,c[1]],[c[0],c[1]+1],[c[0],c[1]-1]]){
       const door = DOOR_INDEX.get(`${v}|${c}`);
-      if (door && door.lock && d.has(key(v)) && !S.bag.some(i=>i.id===door.lock)){
-        S.log.push({t:'bad', m:'Verrouillée. Il faut : '+ITEMS[door.lock].name+'.'}); return refresh(app);
+      if (door && d.has(key(v)) && !S.openDoors.includes(doorKey(door))){
+        const missingKey = door.lock && !S.unlockedDoors.includes(doorKey(door)) && !S.bag.some(i=>i.id===door.lock);
+        S.log.push({t:'bad', m: missingKey ? 'Verrouillée. Il faut : '+ITEMS[door.lock].name+'.' : 'La porte est fermée.'});
+        return refresh(app);
       }
     }
   });

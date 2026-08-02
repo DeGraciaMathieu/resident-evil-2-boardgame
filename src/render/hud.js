@@ -45,6 +45,10 @@ export function refresh(app, cardDrawn=false){
   }
 
   const acts=actions(S);
+  const doorAction = acts.find(a=>a.type==='door');
+  const bd = el('btnDoor');
+  bd.disabled = !doorAction;
+  bd.textContent = doorAction ? (doorAction.opens ? 'Ouvrir la porte' : 'Fermer la porte') : 'Porte';
   el('btnSearch').disabled=!acts.some(a=>a.type==='search');
   el('btnHeal').disabled=!acts.some(a=>a.type==='heal');
   el('btnCombine').disabled=!acts.some(a=>a.type==='combine');

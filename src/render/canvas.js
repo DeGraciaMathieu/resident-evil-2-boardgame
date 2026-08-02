@@ -112,9 +112,12 @@ export function draw(app){
     ctx.fillText(tk.type, a+t/2, b+t/2+1);
   }
 
-  // doors: a token straddling the edge
+  // doors: a token straddling the edge — brown when open, dark when closed,
+  // amber glyph while still locked
   for (const d of DOORS){
-    const open = !d.lock || S.openedDoors.includes(key(d.a)+'|'+key(d.b));
+    const dk = key(d.a)+'|'+key(d.b);
+    const open = S.openDoors.includes(dk);
+    const locked = d.lock && !S.unlockedDoors.includes(dk);
     const [ax,ay]=px(d.a), [bx,by]=px(d.b);
     const cx=(ax+bx)/2+t/2, cy=(ay+by)/2+t/2;
     const horiz = d.a[1]!==d.b[1];              // door on a horizontal edge
@@ -123,9 +126,9 @@ export function draw(app){
     ctx.save(); ctx.translate(cx,cy);
     ctx.fillStyle = open ? '#7A4A22' : '#2A2A2A';
     ctx.fillRect(-w/2,-h/2,w,h);
-    ctx.strokeStyle = open ? '#C08A45' : '#E2A03F';
+    ctx.strokeStyle = open ? '#C08A45' : locked ? '#E2A03F' : '#C08A45';
     ctx.lineWidth=1.5; ctx.strokeRect(-w/2,-h/2,w,h);
-    if (!open){
+    if (locked){
       ctx.fillStyle='#E2A03F'; ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.font=`700 ${Math.max(8,Math.round(t*.3))}px "Courier Prime", monospace`;
       ctx.fillText(d.lock==='keycard'?'▤':'♠', 0, 1);
