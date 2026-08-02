@@ -138,6 +138,10 @@ export function draw(app){
       ctx.strokeStyle='#E2A03F'; ctx.lineWidth=2;
       ctx.beginPath(); ctx.arc(cx,cy,r+4,0,7); ctx.stroke();
     }
+    if (app.focus===e.id){ // enemy currently acting during the end-of-turn playback
+      ctx.strokeStyle='#F0E4C8'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.arc(cx,cy,r+5,0,7); ctx.stroke();
+    }
     ctx.fillStyle = e.type==='licker'?'#B4453F':e.type==='dog'?'#8E5A2A':'#7E1C1C';
     ctx.beginPath();
     if(e.type==='dog'){ ctx.moveTo(cx,cy-r); ctx.lineTo(cx+r*.9,cy+r*.75); ctx.lineTo(cx-r*.9,cy+r*.75); }

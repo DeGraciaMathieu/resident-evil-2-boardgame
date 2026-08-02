@@ -6,12 +6,15 @@ import { actions } from '../rules/actions.js';
 import { recompute, draw } from './canvas.js';
 
 const ICONS = { ammo:'▮', green_herb:'❦', red_herb:'❧', spade_key:'♠', keycard:'▤', shotgun:'⌐' };
+const PHASE_LABELS = { player:'À vous', enemies:'Les ennemis agissent', tension:'Tension' };
 
 export function refresh(app, cardDrawn=false){
   const S = app.S;
   const p=S.player, weapon=WEAPONS[p.weapon], el=id=>document.getElementById(id);
   recompute(app);
   el('turnNo').textContent=S.turn;
+  el('phase').textContent=PHASE_LABELS[S.phase];
+  el('phase').classList.toggle('busy', S.phase!=='player');
   el('weapon').textContent=weapon.name;
   el('dice').textContent=weapon.dice+' / '+weapon.range+(weapon.area?' zone':'');
   el('ammo').textContent=ammoCount(S);
@@ -35,7 +38,7 @@ export function refresh(app, cardDrawn=false){
   el('btnHeal').disabled=!acts.some(a=>a.type==='heal');
   el('btnCombine').disabled=!acts.some(a=>a.type==='combine');
   el('btnWeapon').disabled=!acts.some(a=>a.type==='weapon');
-  el('btnEndTurn').disabled=!!S.over;
+  el('btnEndTurn').disabled=!!S.over || S.phase!=='player';
 
   const lg=el('log');
   lg.innerHTML=S.log.slice(-LOG_MAX).map(l=>`<p class="${l.t||''}">${l.m}</p>`).join('');

@@ -108,6 +108,8 @@ export const INFINITE_DIST = 999; // "unreachable" sentinel for spawn-point choi
 export const LOG_MAX = 40;
 export const DECK_CRITICAL = 4; // "critical" display threshold of the tension deck
 export const CARD_FLIP_DELAY = 260; // ms
+// End-of-turn playback: pause (ms) after each visible step, by step kind.
+export const STEP_DELAYS = { phase:550, move:260, strike:650, spawn:650, card:950 };
 export const SEED_MAX = 99999;
 export const SHAKE_INITIAL = 6;
 export const SHAKE_DAMPING = .8;

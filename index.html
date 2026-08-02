@@ -25,6 +25,7 @@ header h1{font-family:var(--display); font-weight:800; font-size:22px; letter-sp
 header h1 span{color:var(--blood)}
 .meta{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#6E8188; margin-left:auto}
 .meta b{color:var(--warning); font-weight:400}
+.meta #phase.busy{color:#C86A6A}
 main{flex:1; display:grid; grid-template-columns:200px 1fr 244px; min-height:0}
 aside{padding:12px; overflow:auto; display:flex; flex-direction:column; gap:14px}
 aside.left{border-right:1px solid #2A3B42}
@@ -104,7 +105,7 @@ button:focus-visible{outline:2px solid var(--warning); outline-offset:2px}
 <body>
 <header>
   <h1>RPD <span>//</span> Rez-de-chaussée</h1>
-  <div class="meta">Tour <b id="turnNo">1</b> · Seed <b id="seedNo">—</b></div>
+  <div class="meta">Tour <b id="turnNo">1</b> · <b id="phase">À vous</b> · Seed <b id="seedNo">—</b></div>
 </header>
 <main>
   <aside class="left">

@@ -18,7 +18,7 @@ import { bindButtons } from './input/buttons.js';
 const cv = document.getElementById('board');
 const app = {
   cv, ctx: cv.getContext('2d'),
-  S:null, G:null, hover:null, reachable:new Map(), targets:new Set(), shake:0,
+  S:null, G:null, hover:null, reachable:new Map(), targets:new Set(), shake:0, focus:null,
 };
 
 bindMouse(app, { act, refresh, draw });
