@@ -175,6 +175,7 @@ import { makeRng, rndInt, shuffle } from './src/rules/rng.js';
 import { CASES, PORTE_INDEX, BORNES, cle, tuileDe, tuile, memeCase, distCases, passe } from './src/rules/plateau.js';
 import { distances, premierPas } from './src/rules/deplacement.js';
 import { vue } from './src/rules/vue.js';
+import { aObjet, ajouter, retirer, nbMunitions } from './src/rules/sac.js';
 
 /* ------------------------------------------------------------- PARTIE */
 function creerPartie(seed){
@@ -206,21 +207,6 @@ function creerPartie(seed){
   };
 }
 
-const aObjet=(s,id)=>s.sac.some(i=>i.id===id);
-function ajouter(s,id,n=1){
-  const def=ITEMS[id];
-  const slot=s.sac.find(i=>i.id===id && i.n<def.pile);
-  if(slot){ slot.n=Math.min(def.pile,slot.n+n); return true; }
-  if(s.sac.length>=s.sacMax) return false;
-  s.sac.push({id,n}); return true;
-}
-function retirer(s,id,n=1){
-  const i=s.sac.findIndex(x=>x.id===id);
-  if(i<0) return false;
-  s.sac[i].n-=n; if(s.sac[i].n<=0) s.sac.splice(i,1);
-  return true;
-}
-const nbMunitions=(s)=>s.sac.filter(i=>i.id==='munitions').reduce((a,b)=>a+b.n,0);
 const dit=(s,m,t='info')=>s.log.push({t,m});
 
 /* ---------------------------------------------------------- ACTIONS */
