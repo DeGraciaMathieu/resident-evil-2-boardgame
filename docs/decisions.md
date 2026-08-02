@@ -125,6 +125,21 @@ game. Each entry: what it is, where, and why it was not fixed.
   `bonus:'shotgun'`), and `search` handles `bonus` before `content`. Mechanism kept
   as is.
 
+## Door mechanic (added 2026-08-02)
+
+Doors are closed by default; the `door` action (1 AP) opens or closes the door
+adjacent to the player. Deliberate choices, revisit only on explicit request:
+
+- A closed door blocks **everyone**: player movement, enemy pathing and line of
+  sight. Enemies never operate doors (thematic: zombies), so closing a door behind
+  you is a real defensive move.
+- Keys no longer grant passage on the move; they only make the open action legal on
+  a locked door. Unlocking stays durable (`s.unlockedDoors`), open/closed is
+  reversible (`s.openDoors`).
+- Spawn points keep requiring an enemy path to the player: points behind closed
+  doors are never chosen, so early spawns concentrate on the hall's ring. If both
+  hall points are occupied, a spawn card does nothing — accepted for now.
+
 ## Open questions
 
 Decisions the code does not settle and that were not made. Never resolved by guessing.

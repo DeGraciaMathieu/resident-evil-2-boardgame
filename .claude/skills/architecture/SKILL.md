@@ -37,7 +37,8 @@ Import arrows always point down this table. `input/` never touches `render/` nor
 ## The two state objects
 
 - `S` (game state, `createGame`): `seed`, `rng`, `turn`, `ap`/`maxAp`, `player`,
-  `bag`/`bagMax`, `enemies`, `nextId`, `tokens`, `openedDoors`, `deck`/`discard`/
+  `bag`/`bagMax`, `enemies`, `nextId`, `tokens`, `openDoors`, `unlockedDoors`,
+  `deck`/`discard`/
   `lastCard`, `lastTile`, `phase` (`player`|`enemies`|`tension`), `over`
   (`null`|`victory`|`defeat`), `log`.
 - `app` (application state, `main.js`): `cv`, `ctx`, `S`, `G` (geometry), `hover`,

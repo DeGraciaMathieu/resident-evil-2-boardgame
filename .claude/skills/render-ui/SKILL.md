@@ -38,7 +38,7 @@ transient cosmetic effects pushed via `addFx`, timed with `performance.now`) and
 | Phase banner over the board | `banner(text, tone)` — ids `banner`/`bannerText`, tones `enemy`/`tension`/`player`; shown by class `show`, hidden on a JS timer (`BANNER_HOLD`) | `src/render/hud.js` |
 | Card pull animation | class `pull` on id `deck` (keyframes `pull`), added by `refresh` when a card is drawn | `src/render/hud.js` |
 | Phase label (header) | `PHASE_LABELS` + id `phase` (class `busy` outside the player phase) | `src/render/hud.js` |
-| HUD DOM ids | `turnNo`, `phase`, `seedNo`, `hp`, `ap`, `weapon`, `dice`, `ammo`, `location`, `bag`, `log`, `remaining`, `card`, `cardTitle`, `cardText`, `cardNum`, `gameOver`, `gameOverTitle`, `gameOverText`, buttons `btnSearch`/`btnHeal`/`btnCombine`/`btnWeapon`/`btnEndTurn` | `index.html` |
+| HUD DOM ids | `turnNo`, `phase`, `seedNo`, `hp`, `ap`, `weapon`, `dice`, `ammo`, `location`, `bag`, `log`, `remaining`, `card`, `cardTitle`, `cardText`, `cardNum`, `gameOver`, `gameOverTitle`, `gameOverText`, buttons `btnSearch`/`btnDoor`/`btnHeal`/`btnCombine`/`btnWeapon`/`btnEndTurn` (`btnDoor`'s label switches between « Ouvrir la porte » and « Fermer la porte ») | `index.html` |
 
 ## The layer contract
 

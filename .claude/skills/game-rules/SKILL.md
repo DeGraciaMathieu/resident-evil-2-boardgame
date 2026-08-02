@@ -16,8 +16,9 @@ same seed, same game).
 | --- | --- | --- |
 | Legal actions of a state | `actions(s)` → `[{type, cost, …}]` | `src/rules/actions.js` |
 | Resolving an action | `play(s, action)` | `src/rules/play.js` |
-| Action types | `move`, `attack`, `search`, `heal`, `combine`, `weapon`, `end` | `actions.js` + `play.js` |
+| Action types | `move`, `attack`, `search`, `door`, `heal`, `combine`, `weapon`, `end` | `actions.js` + `play.js` |
 | Move cost (1, or 2 when engaged in contact) | `MOVE_COST`, `DISENGAGE_MOVE_COST` | `src/config.js`, read by `actions` |
+| Door toggle (open/close the adjacent door; key required while locked) | `door` action, `DOOR_COST` | `actions.js` + `play.js`, `src/config.js` |
 | Attack dice roll | `DIE[rndInt(s.rng, DIE.length)]` × `weapon.dice` | `src/rules/play.js`, `attack` case |
 | Weapon profiles (dice, range, ammo, area) | `WEAPONS` | `src/config.js` |
 | Enemy profiles (hp, damage, speed) | `ENEMIES` | `src/config.js` |

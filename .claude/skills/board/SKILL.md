@@ -22,10 +22,12 @@ The map is declared as data in `src/config.js` and indexed once and for all in
 | Cell → tile index | `CELLS` (Map, built at load time) | `src/rules/board.js` |
 | Edge → door index | `DOOR_INDEX` (Map, both directions) | `src/rules/board.js` |
 | Grid dimensions | `BOUNDS` (`{w, h}`, derived from `CELLS`) | `src/rules/board.js` |
-| Edge passability | `canPass(s, a, b, forEnemy)` | `src/rules/board.js` |
-| Doors unlocked during the game | `s.openedDoors` (`"x,y\|x2,y2"` keys) | state `S` |
-| Reachable cells (bounded BFS) | `distances(s, from, forEnemy, max)` | `src/rules/movement.js` |
-| Cell-by-cell path | `firstStep(s, from, to, forEnemy)` | `src/rules/movement.js` |
+| Edge passability | `canPass(s, a, b)` | `src/rules/board.js` |
+| Door touching a cell / door key | `doorAt(c)`, `doorKey(d)` | `src/rules/board.js` |
+| Doors currently open (toggleable) | `s.openDoors` (`"x,y\|x2,y2"` keys) | state `S` |
+| Doors unlocked during the game (durable) | `s.unlockedDoors` (same keys) | state `S` |
+| Reachable cells (bounded BFS) | `distances(s, from, max)` | `src/rules/movement.js` |
+| Cell-by-cell path | `firstStep(s, from, to)` | `src/rules/movement.js` |
 | Line of sight | `lineOfSight(s, a, b)` | `src/rules/sight.js` |
 | Chebyshev distance (weapon range) | `cellDistance(a, b)` | `src/rules/board.js` |
 | Range of one move action | `MOVE_RANGE` (2 cells) | `src/config.js` |
@@ -36,10 +38,11 @@ The map is declared as data in `src/config.js` and indexed once and for all in
 - Two cells of the **same tile** always communicate; between **two tiles**, an entry
   in `DOORS` is required, otherwise it is a wall — even when the cells touch (that is
   what landlocks the darkroom, cf. `docs/decisions.md`).
-- A locked door passes if it is in `s.openedDoors`, otherwise if the **player** holds
-  the `lock` item in the bag; an **enemy** (`forEnemy=true`) never crosses it while it
-  is not opened.
-- Crossing a door is a normal step (no surcharge).
+- Doors are **closed by default** and block everyone — player, enemies, line of
+  sight. Passage requires the door in `s.openDoors`, toggled by the `door` action
+  (see the `game-rules` skill). Keys grant no passage by themselves: they only make
+  the open action legal on a locked door (unlocking is durable, `s.unlockedDoors`).
+- Crossing an open door is a normal step (no surcharge).
 - Two metrics deliberately coexist: orthogonal BFS for movement, Chebyshev for weapon
   range.
 
