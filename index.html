@@ -172,43 +172,8 @@ import {
   SECOUSSE_INITIALE, SECOUSSE_AMORTISSEMENT, SECOUSSE_SEUIL,
 } from './src/config.js';
 import { makeRng, rndInt, shuffle } from './src/rules/rng.js';
+import { CASES, PORTE_INDEX, BORNES, cle, tuileDe, tuile, memeCase, distCases, passe, adjacentes } from './src/rules/plateau.js';
 
-/* --------------------------------------------------- index des cases */
-const CASES = new Map();       // "x,y" -> id de tuile
-for (const t of TUILES)
-  for (const [x,y,w,h] of t.rects)
-    for (let i=0;i<w;i++) for (let j=0;j<h;j++) CASES.set(`${x+i},${y+j}`, t.id);
-
-const PORTE_INDEX = new Map(); // "x,y|x2,y2" -> porte
-for (const p of PORTES){
-  PORTE_INDEX.set(`${p.a}|${p.b}`, p);
-  PORTE_INDEX.set(`${p.b}|${p.a}`, p);
-}
-const BORNES = (()=>{
-  let X=0,Y=0;
-  for (const k of CASES.keys()){ const [x,y]=k.split(',').map(Number); X=Math.max(X,x); Y=Math.max(Y,y); }
-  return { w:X+1, h:Y+1 };
-})();
-
-const cle = (c) => `${c[0]},${c[1]}`;
-const tuileDe = (c) => CASES.get(cle(c));
-const tuile = (id) => TUILES.find(t=>t.id===id);
-const memeCase = (a,b) => a[0]===b[0] && a[1]===b[1];
-
-// Passage entre deux cases orthogonalement adjacentes.
-function passe(s, a, b, pourEnnemi=false){
-  const ta = CASES.get(cle(a)), tb = CASES.get(cle(b));
-  if (!ta || !tb) return false;
-  if (ta === tb) return true;                       // même tuile : libre
-  const p = PORTE_INDEX.get(`${a}|${b}`);
-  if (!p) return false;                             // mur : pas de porte
-  if (!p.verrou) return true;
-  if (s.portesOuvertes.includes(cle(p.a)+'|'+cle(p.b))) return true;
-  return pourEnnemi ? false : s.sac.some(i=>i.id===p.verrou);
-}
-function adjacentes(c){
-  return [[c[0]+1,c[1]],[c[0]-1,c[1]],[c[0],c[1]+1],[c[0],c[1]-1]];
-}
 function distances(s, depart, pourEnnemi=false, max=99){
   const d = new Map([[cle(depart),0]]);
   const file = [depart];
@@ -262,7 +227,6 @@ function vue(s, a, b){
   }
   return false;
 }
-const distCases = (a,b) => Math.max(Math.abs(a[0]-b[0]), Math.abs(a[1]-b[1]));
 
 /* ------------------------------------------------------------- PARTIE */
 function creerPartie(seed){
