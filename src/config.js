@@ -100,6 +100,8 @@ export const DIST_APPARITION = { approche:6, grogne:1, meute:4, licker:3 };
 export const COUT_DEPLACEMENT = 1;
 export const COUT_DEPLACEMENT_ENGAGE = 2; // se dégager du contact coûte une action de plus
 export const GARDE_VUE = 200; // garde anti-boucle infinie du tracé de ligne de vue
+export const PORTEE_BFS_MAX = 99; // profondeur par défaut du BFS (borne de sécurité)
+export const DIST_INFINIE = 999; // sentinelle « inatteignable » pour le choix d'apparition
 
 /* ------------------------------------------------------------ INTERFACE */
 export const JOURNAL_MAX = 40;

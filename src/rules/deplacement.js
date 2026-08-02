@@ -1,7 +1,8 @@
 /* Déplacement : distances atteignables (BFS) et chemin le plus court. */
+import { PORTEE_BFS_MAX } from '../config.js';
 import { cle, memeCase, passe, adjacentes } from './plateau.js';
 
-export function distances(s, depart, pourEnnemi=false, max=99){
+export function distances(s, depart, pourEnnemi=false, max=PORTEE_BFS_MAX){
   const d = new Map([[cle(depart),0]]);
   const file = [depart];
   while (file.length){

@@ -35,7 +35,7 @@ export function jouer(s, action){
         ? s.ennemis.filter(e => distCases(s.joueur.c,e.c)<=arme.portee && vue(s,s.joueur.c,e.c))
         : [s.ennemis.find(e=>e.id===action.cible)].filter(Boolean);
       for (const cible of cibles){
-        const des = Array.from({length:arme.des}, ()=>DE[rndInt(s.rng,6)]);
+        const des = Array.from({length:arme.des}, ()=>DE[rndInt(s.rng,DE.length)]);
         const total = des.reduce((a,b)=>a+b,0);
         cible.pv -= total;
         dit(s, `${arme.nom} → ${cible.nom} · dés [${des.join(' ')}] = ${total}`, total?'bien':'mal');

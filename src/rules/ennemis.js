@@ -1,5 +1,5 @@
 /* Ennemis : activation (poursuite et attaque) et apparition. */
-import { APPARITIONS, ENNEMIS } from '../config.js';
+import { APPARITIONS, ENNEMIS, DIST_INFINIE } from '../config.js';
 import { cle, memeCase, distCases, passe } from './plateau.js';
 import { distances, premierPas } from './deplacement.js';
 import { dit } from './journal.js';
@@ -27,8 +27,8 @@ export function activer(s, bonus=0){
 export function pointApparition(s, distMin){
   const d = distances(s, s.joueur.c, true);
   const libres = APPARITIONS.filter(p => !s.ennemis.some(e=>memeCase(e.c,p)));
-  const notes = libres.map(p => ({ p, d: d.has(cle(p)) ? d.get(cle(p)) : 999 }))
-                      .filter(o => o.d < 999)
+  const notes = libres.map(p => ({ p, d: d.has(cle(p)) ? d.get(cle(p)) : DIST_INFINIE }))
+                      .filter(o => o.d < DIST_INFINIE)
                       .sort((a,b)=>a.d-b.d);
   if (!notes.length) return null;
   return (notes.find(o=>o.d>=distMin) || notes[notes.length-1]).p;
