@@ -176,8 +176,7 @@ import { vue } from './src/rules/vue.js';
 import { ajouter, retirer, nbMunitions } from './src/rules/sac.js';
 import { actions } from './src/rules/actions.js';
 import { dit } from './src/rules/journal.js';
-import { activer } from './src/rules/ennemis.js';
-import { tirerTension } from './src/rules/tension.js';
+import { finDeTour } from './src/rules/tour.js';
 
 /* ------------------------------------------------------------- PARTIE */
 function creerPartie(seed){
@@ -261,12 +260,6 @@ function jouer(s, action){
 
   if (s.pa<=0 && !s.fin) finDeTour(s);
   return s;
-}
-
-function finDeTour(s){
-  s.phase='ennemis'; activer(s); if (s.fin) return;
-  s.phase='tension'; tirerTension(s); if (s.fin) return;
-  s.tour+=1; s.pa=s.paMax; s.phase='joueur';
 }
 
 /* =========================================================================
