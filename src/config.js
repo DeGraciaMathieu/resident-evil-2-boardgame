@@ -121,7 +121,7 @@ export const CARD_FLIP_DELAY = 260; // ms
 // End-of-turn playback: pause (ms) after each visible step, by step kind.
 export const STEP_DELAYS = { phase:1000, move:260, strike:650, spawn:650, card:950, turn:600 };
 // Cosmetic canvas FX durations (ms) staged during the playback.
-export const FX_DURATION = { tween:200, spawn:500, hit:700, dice:1000 };
+export const FX_DURATION = { tween:200, spawn:500, hit:700, dice:1600 };
 // How long the phase banner stays visible (ms) before the HUD hides it.
 export const BANNER_HOLD = 1100;
 export const SEED_MAX = 99999;

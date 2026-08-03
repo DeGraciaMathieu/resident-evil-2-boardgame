@@ -209,8 +209,6 @@ export function draw(app){
     let x = a + t/2 - width/2 + side/2;
     const y = b - t*.32;
     ctx.globalAlpha = p>.85 ? (1-p)/.15 : 1;
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.font=`700 ${Math.max(9,Math.round(side*.62))}px "Courier Prime", monospace`;
     for (let i=0;i<f.dice.length;i++){
       const die = f.dice[i];
       const v = rolling ? (Math.floor(now/55)+i*2)%3 : die.face;
@@ -219,8 +217,11 @@ export function draw(app){
       ctx.fillStyle = die.color==='blue' ? '#2E4A66' : '#7E1C1C';
       ctx.fillRect(-side/2,-side/2,side,side);
       ctx.strokeStyle='#16232A'; ctx.lineWidth=1.5; ctx.strokeRect(-side/2,-side/2,side,side);
+      // hit pips: face value is a count of hits, shown as dots rather than the raw digit
       ctx.fillStyle = !rolling && v===0 ? 'rgba(240,228,200,.45)' : '#F0E4C8';
-      ctx.fillText(v, 0, 1);
+      const pipR = side*.11, pipGap = side*.26;
+      const pipOffsets = v===1 ? [0] : v===2 ? [-pipGap/2, pipGap/2] : [];
+      for (const off of pipOffsets){ ctx.beginPath(); ctx.arc(off,1,pipR,0,7); ctx.fill(); }
       ctx.restore();
       x += side+gap;
     }
