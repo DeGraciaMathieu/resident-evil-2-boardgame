@@ -2,7 +2,7 @@
    When the player's AP run out, the end of turn is replayed step by step
    (one refresh per visible change) instead of resolving all at once; each
    step is staged as a visual effect (banner, tween, pop, floating damage). */
-import { STEP_DELAYS, SHAKE_INITIAL } from '../config.js';
+import { STEP_DELAYS, FX_DURATION, SHAKE_INITIAL } from '../config.js';
 import { play } from '../rules/play.js';
 import { turnOver, endTurnSteps } from '../rules/turn.js';
 import { refresh, banner } from '../render/hud.js';
@@ -13,7 +13,12 @@ export function act(app, a){
   const n = app.S.deck.length;
   play(app.S, a);
   if (a.type==='attack')
-    for (const r of app.S.lastRolls) addFx(app, { kind:'dice', dice:r.dice, c:r.c });
+    for (const r of app.S.lastRolls){
+      addFx(app, { kind:'dice', dice:r.dice, c:r.c });
+      // the retreat only plays once the dice roll animation is over
+      if (r.pushed) addFx(app, { kind:'tween', id:r.id, from:r.c, to:r.pushed,
+        delay:FX_DURATION.dice, dur:FX_DURATION.dice+FX_DURATION.tween });
+    }
   refresh(app, n !== app.S.deck.length);
   if (turnOver(app.S)) playback(app, endTurnSteps(app.S));
 }

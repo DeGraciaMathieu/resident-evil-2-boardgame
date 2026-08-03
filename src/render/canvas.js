@@ -26,8 +26,9 @@ export function geometry(app){
 }
 
 // Cosmetic transient effect (tween, spawn pop, floating damage), pure presentation.
+// `dur` may be overridden by the caller (e.g. a tween held past its own delay).
 export function addFx(app, fx){
-  app.fx.push({ ...fx, t0: performance.now(), dur: FX_DURATION[fx.kind] });
+  app.fx.push({ dur: FX_DURATION[fx.kind], ...fx, t0: performance.now() });
 }
 
 const easeOut = p => p*(2-p);
@@ -148,7 +149,8 @@ export function draw(app){
     let cell = e.c, scale = 1;
     const tw = app.fx.find(f=>f.kind==='tween' && f.id===e.id);
     if (tw){
-      const p = easeOut(Math.min(1,(now-tw.t0)/tw.dur));
+      const elapsed = now - tw.t0 - (tw.delay||0);
+      const p = easeOut(Math.min(1,Math.max(0,elapsed)/FX_DURATION.tween));
       cell = [tw.from[0]+(tw.to[0]-tw.from[0])*p, tw.from[1]+(tw.to[1]-tw.from[1])*p];
     }
     const [a,b]=px(cell), cx=a+t/2, cy=b+t/2;
