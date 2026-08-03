@@ -41,6 +41,7 @@ src/
     bag.js            inventory
     actions.js        action legality
     play.js           applying an action
+    combat.js         dice combat: rolling a weapon profile, resolving face effects
     enemies.js        activation and spawning
     tension.js        tension deck
     turn.js           phase sequencing
