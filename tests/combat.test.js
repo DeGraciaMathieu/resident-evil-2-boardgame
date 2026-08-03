@@ -77,6 +77,8 @@ test('knife rolls one red die: a 2-hit face deals 2 damage', () => {
   play(s, { type:'attack', target:1, cost:1 });
   assert.equal(s.lastRolls[0].dice[0].color, 'red');
   assert.equal(s.enemies[0].hp, 2);
+  // dmg travels with the roll: the board stages a floating damage fx from it
+  assert.equal(s.lastRolls[0].dmg, 2);
   assert.equal(s.bag[0].n, 4); // the knife costs no ammo
 });
 

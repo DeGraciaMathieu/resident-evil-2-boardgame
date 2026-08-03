@@ -13,7 +13,10 @@ export function act(app, a){
   const n = app.S.deck.length;
   play(app.S, a);
   if (a.type==='attack')
-    for (const r of app.S.lastRolls) addFx(app, { kind:'dice', dice:r.dice, c:r.c });
+    for (const r of app.S.lastRolls){
+      addFx(app, { kind:'dice', dice:r.dice, c:r.c });
+      if (r.dmg) addFx(app, { kind:'hit', dmg:r.dmg, c:r.c });
+    }
   refresh(app, n !== app.S.deck.length);
   if (turnOver(app.S)) playback(app, endTurnSteps(app.S));
 }
