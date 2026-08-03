@@ -30,7 +30,7 @@ export function play(s, action){
       for (const target of targets){
         const at = [...target.c]; // dice show where the target was shot, not where it lands
         const r = resolveAttack(s, weapon, target);
-        s.lastRolls.push({ dice:r.dice, c:at });
+        s.lastRolls.push({ dice:r.dice, c:at, dmg:r.damage });
         const faces = r.dice.map(d=>(d.color==='blue'?'B':'R')+d.face).join(' ');
         const outcome = [r.damage?`−${r.damage} PV`:'', r.pushed?'repoussé':''].filter(Boolean).join(', ');
         say(s, `${weapon.name} → ${target.name} · dés [${faces}] ${outcome||'aucun effet'}`, outcome?'good':'bad');
