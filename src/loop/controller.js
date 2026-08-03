@@ -15,6 +15,7 @@ export function act(app, a){
   if (a.type==='attack')
     for (const r of app.S.lastRolls){
       addFx(app, { kind:'dice', dice:r.dice, c:r.c });
+      if (r.dmg) addFx(app, { kind:'hit', dmg:r.dmg, c:r.c });
       // the retreat only plays once the dice roll animation is over
       if (r.pushed) addFx(app, { kind:'tween', id:r.id, from:r.c, to:r.pushed,
         delay:FX_DURATION.dice, dur:FX_DURATION.dice+FX_DURATION.tween });
